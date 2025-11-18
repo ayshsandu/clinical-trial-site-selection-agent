@@ -31,7 +31,7 @@ def create_agent() -> StateGraph:
     workflow.add_node("query_demographics", query_demographics)
     workflow.add_node("query_performance", query_performance)
     workflow.add_node("analyze_and_rank", analyze_and_rank)
-    workflow.add_node("generate_report", generate_report)
+    # workflow.add_node("generate_report", generate_report)
     
     # Set entry point
     workflow.set_entry_point("parse_requirements")
@@ -40,8 +40,9 @@ def create_agent() -> StateGraph:
     workflow.add_edge("parse_requirements", "query_demographics")
     workflow.add_edge("query_demographics", "query_performance")
     workflow.add_edge("query_performance", "analyze_and_rank")
-    workflow.add_edge("analyze_and_rank", "generate_report")
-    workflow.add_edge("generate_report", END)
+    # workflow.add_edge("analyze_and_rank", "generate_report")
+    # workflow.add_edge("generate_report", END)
+    workflow.add_edge("analyze_and_rank", END)
     
     # Compile workflow
     app = workflow.compile()

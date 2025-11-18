@@ -67,6 +67,7 @@ Edit `.env`:
 GOOGLE_API_KEY=your-google-api-key-here
 DEMOGRAPHICS_SERVER_URL=http://localhost:4001/mcp
 PERFORMANCE_SERVER_URL=http://localhost:4002/mcp
+JWKS_URL=https://your-auth-server/.well-known/jwks.json
 LOG_LEVEL=INFO
 ```
 
@@ -104,6 +105,71 @@ poetry run python main.py \
   --performance-url http://localhost:4002/mcp
 ```
 
+## API Usage
+
+The agent can also be run as a REST API server with OAuth 2.0 Bearer token authentication.
+
+### Starting the API Server
+
+```bash
+poetry run python main.py --api --host 0.0.0.0 --port 8000 --jwks-url https://your-auth-server/.well-known/jwks.json
+```
+
+### Environment Variables
+
+Add to your `.env` file:
+
+```bash
+JWKS_URL=https://your-auth-server/.well-known/jwks.json
+```
+
+### API Endpoints
+
+#### POST /api/query
+
+Run a clinical trial site selection query.
+
+**Authentication**: Bearer token required in Authorization header.
+
+**Request Body**:
+```json
+{
+  "query": "Find sites for Phase III Type 2 Diabetes trial in Northeast US",
+  "format": "json"
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "result": {
+    "user_query": "Find sites for Phase III Type 2 Diabetes trial in Northeast US",
+    "trial_requirements": {...},
+    "recommended_sites": [...],
+    "analysis_summary": "...",
+    "audit_trail": [...],
+    "generated_at": "2025-11-17T10:35:00"
+  }
+}
+```
+
+#### GET /api/health
+
+Health check endpoint (no authentication required).
+
+**Response**:
+```json
+{
+  "status": "healthy",
+  "service": "clinical-trial-agent"
+}
+```
+
+### API Documentation
+
+When running the API server, visit `http://localhost:8000/docs` for interactive Swagger documentation.
+
 ## Example Queries
 
 ```bash
@@ -135,6 +201,7 @@ clinical-trial-agent/
 └── src/
     ├── __init__.py
     ├── agent.py                # LangGraph workflow
+    ├── auth.py                 # OAuth 2.0 authentication
     ├── state.py                # State definitions
     ├── mcp_client.py           # MCP client wrapper
     └── nodes/

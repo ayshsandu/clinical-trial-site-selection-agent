@@ -13,8 +13,8 @@ import json
 import uvicorn
 from pathlib import Path
 from dotenv import load_dotenv
-from typing import Optional
-from fastapi import FastAPI, HTTPException
+from typing import Optional, Any
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.agent import run_agent
 from src.nodes import format_report, format_json_report
+from src.auth import validate_token, security, set_jwks_url
 
 # Load environment variables
 load_dotenv()
@@ -61,13 +62,22 @@ class QueryRequest(BaseModel):
 
 class QueryResponse(BaseModel):
     success: bool
-    result: Optional[str] = None
+    result: Optional[Any] = None
     error: Optional[str] = None
+
+
+# Configure JWKS URL for authentication
+jwks_url = os.getenv("JWKS_URL")
+if jwks_url:
+    set_jwks_url(jwks_url)
+    logger.info(f"JWKS URL configured: {jwks_url}")
+else:
+    logger.warning("JWKS_URL not set - API endpoints will not require authentication")
 
 
 # API endpoints
 @app.post("/api/query", response_model=QueryResponse)
-async def run_query(request: QueryRequest):
+async def run_query(request: QueryRequest, token_payload: dict = Depends(validate_token)):
     """
     Run a clinical trial site selection query.
 
@@ -86,12 +96,9 @@ async def run_query(request: QueryRequest):
             raise HTTPException(status_code=400, detail=final_state['error_message'])
 
         # Format output
-        if request.format == "json":
-            result = json.dumps(format_json_report(final_state), indent=2)
-        else:
-            result = format_report(final_state)
+        result = format_json_report(final_state)
+        logger.info("Query completed successfully. Returning JSON formatted report")
 
-        logger.info("Query completed successfully")
         return QueryResponse(success=True, result=result)
 
     except Exception as e:
@@ -178,7 +185,21 @@ Examples:
         help="Site Performance MCP server URL"
     )
     
+    parser.add_argument(
+        "--jwks-url",
+        type=str,
+        default=os.getenv("JWKS_URL"),
+        help="JWKS URL for OAuth 2.0 token validation (required for API mode)"
+    )
+    
     args = parser.parse_args()
+
+    # Set environment variables for MCP clients and JWKS
+    os.environ["DEMOGRAPHICS_SERVER_URL"] = args.demographics_url
+    os.environ["PERFORMANCE_SERVER_URL"] = args.performance_url
+    
+    if args.jwks_url:
+        os.environ["JWKS_URL"] = args.jwks_url
 
     # Start API server if requested
     if args.api:
@@ -189,6 +210,9 @@ Examples:
         print(f"🔍 Health check: http://{args.host}:{args.port}/api/health")
         print("\nPress Ctrl+C to stop the server\n")
 
+        if args.jwks_url:
+            print("JWKS_URL set to: " + args.jwks_url)
+
         uvicorn.run(
             "main:app",
             host=args.host,
@@ -198,14 +222,25 @@ Examples:
         )
         return
 
-    # Set environment variables for MCP clients
-    os.environ["DEMOGRAPHICS_SERVER_URL"] = args.demographics_url
-    os.environ["PERFORMANCE_SERVER_URL"] = args.performance_url
+    # Set environment variables for MCP clients (already done above)
+    # os.environ["DEMOGRAPHICS_SERVER_URL"] = args.demographics_url
+    # os.environ["PERFORMANCE_SERVER_URL"] = args.performance_url
+    
+    # if args.jwks_url:
+    #     os.environ["JWKS_URL"] = args.jwks_url
+    #     logger.info("JWKS_URL set to: " + os.getenv("JWKS_URL", "Not Set"))
+
     
     # Check API key
     if not os.getenv("GOOGLE_API_KEY"):
         logger.error("GOOGLE_API_KEY environment variable not set")
         print("Error: Please set GOOGLE_API_KEY environment variable")
+        sys.exit(1)
+    
+    # Check JWKS URL for API mode
+    if args.api and not os.getenv("JWKS_URL"):
+        logger.error("JWKS_URL environment variable not set. Use --jwks-url or set JWKS_URL env var")
+        print("Error: Please set JWKS_URL environment variable or provide --jwks-url for API mode")
         sys.exit(1)
     
     # Get query
