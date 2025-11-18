@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useAuthContext } from '@asgardeo/auth-react'
 import './App.css'
 import QueryForm from './components/QueryForm'
 import ResultsDisplay from './components/ResultsDisplay'
@@ -6,12 +7,14 @@ import LoadingState from './components/LoadingState'
 import ErrorDisplay from './components/ErrorDisplay'
 import Header from './components/Header'
 import ExampleQueries from './components/ExampleQueries'
+import AuthGuard from './components/AuthGuard'
 
 function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [results, setResults] = useState(null)
   const [error, setError] = useState(null)
   const [queryHistory, setQueryHistory] = useState([])
+  const { getAccessToken } = useAuthContext()
 
   const handleQuery = async (query) => {
     setIsLoading(true)
@@ -19,10 +22,15 @@ function App() {
     setResults(null)
 
     try {
+      // Get the access token to include in the API request
+      const accessToken = await getAccessToken()
+      
       const response = await fetch('http://localhost:8010/api/query', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          // Include the access token in the Authorization header
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ query }),
       })
@@ -62,42 +70,44 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <Header />
-      
-      <main className="container">
-        <div className="main-content">
-          <div className="query-section">
-            <QueryForm 
-              onSubmit={handleQuery} 
-              isLoading={isLoading}
-            />
+    <AuthGuard>
+      <div className="app">
+        <Header />
+        
+        <main className="container">
+          <div className="main-content">
+            <div className="query-section">
+              <QueryForm 
+                onSubmit={handleQuery} 
+                isLoading={isLoading}
+              />
+              
+              {!isLoading && !results && !error && (
+                <ExampleQueries onSelectExample={handleExampleQuery} />
+              )}
+            </div>
+
+            {isLoading && <LoadingState />}
             
-            {!isLoading && !results && !error && (
-              <ExampleQueries onSelectExample={handleExampleQuery} />
+            {error && <ErrorDisplay error={error} />}
+            
+            {results && !isLoading && (
+              <ResultsDisplay 
+                results={results}
+                queryHistory={queryHistory}
+                onSelectHistory={handleHistoryQuery}
+              />
             )}
           </div>
+        </main>
 
-          {isLoading && <LoadingState />}
-          
-          {error && <ErrorDisplay error={error} />}
-          
-          {results && !isLoading && (
-            <ResultsDisplay 
-              results={results}
-              queryHistory={queryHistory}
-              onSelectHistory={handleHistoryQuery}
-            />
-          )}
-        </div>
-      </main>
-
-      <footer className="footer">
-        <div className="container">
-          <p>Clinical Trial Site Selection Agent • Powered by LangGraph & Claude</p>
-        </div>
-      </footer>
-    </div>
+        <footer className="footer">
+          <div className="container">
+            <p>Clinical Trial Site Selection Agent • Powered by LangGraph & Claude</p>
+          </div>
+        </footer>
+      </div>
+    </AuthGuard>
   )
 }
 
