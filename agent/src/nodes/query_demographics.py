@@ -62,7 +62,9 @@ def query_demographics(state: TrialSiteSelectionState) -> TrialSiteSelectionStat
                             "min_population": min_population
                         }
                     )
-                    
+                    # log result
+                    logger.info(f"search_patient_pools result: {result}")
+
                     found_pools = result.get("pools", [])
                     pools.extend(found_pools)
                     

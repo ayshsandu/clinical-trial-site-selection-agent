@@ -2,7 +2,7 @@
 """
 Main entry point for the Clinical Trial Site Selection Agent.
 
-This script provides a command-line interface to run the agent.
+This script provides both a command-line interface and REST API to run the agent.
 """
 
 import os
@@ -10,8 +10,12 @@ import sys
 import logging
 import argparse
 import json
+import uvicorn
 from pathlib import Path
 from dotenv import load_dotenv
+from typing import Optional
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -31,6 +35,66 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+# FastAPI app
+app = FastAPI(
+    title="Clinical Trial Site Selection Agent API",
+    description="API for running clinical trial site selection queries",
+    version="1.0.0"
+)
+
+
+# Pydantic models
+class QueryRequest(BaseModel):
+    query: str
+    format: Optional[str] = "text"  # "text" or "json"
+
+
+class QueryResponse(BaseModel):
+    success: bool
+    result: Optional[str] = None
+    error: Optional[str] = None
+
+
+# API endpoints
+@app.post("/api/query", response_model=QueryResponse)
+async def run_query(request: QueryRequest):
+    """
+    Run a clinical trial site selection query.
+
+    - **query**: The clinical trial site selection query
+    - **format**: Response format ("text" or "json")
+    """
+    try:
+        logger.info(f"API request: {request.query}")
+
+        # Run the agent
+        final_state = run_agent(request.query)
+
+        # Check for errors
+        if final_state.get("error_message"):
+            logger.error(f"Agent error: {final_state['error_message']}")
+            raise HTTPException(status_code=400, detail=final_state['error_message'])
+
+        # Format output
+        if request.format == "json":
+            result = json.dumps(format_json_report(final_state), indent=2)
+        else:
+            result = format_report(final_state)
+
+        logger.info("Query completed successfully")
+        return QueryResponse(success=True, result=result)
+
+    except Exception as e:
+        logger.exception("Error processing query")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "healthy", "service": "clinical-trial-agent"}
+
+
 def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(
@@ -46,13 +110,36 @@ Examples:
 
   # Output as JSON
   python main.py --query "Find sites..." --json --output results.json
+
+  # Start API server
+  python main.py --api --host 0.0.0.0 --port 8000
         """
     )
-    
+
     parser.add_argument(
         "--query",
         type=str,
         help="Clinical trial site selection query"
+    )
+
+    parser.add_argument(
+        "--api",
+        action="store_true",
+        help="Start the API server instead of running a single query"
+    )
+
+    parser.add_argument(
+        "--host",
+        type=str,
+        default="127.0.0.1",
+        help="API server host (default: 127.0.0.1)"
+    )
+
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="API server port (default: 8000)"
     )
     
     parser.add_argument(
@@ -82,7 +169,25 @@ Examples:
     )
     
     args = parser.parse_args()
-    
+
+    # Start API server if requested
+    if args.api:
+        logger.info(f"Starting API server on {args.host}:{args.port}")
+        print(f"🚀 Starting Clinical Trial Site Selection Agent API")
+        print(f"📡 Server will be available at: http://{args.host}:{args.port}")
+        print(f"📚 API documentation: http://{args.host}:{args.port}/docs")
+        print(f"🔍 Health check: http://{args.host}:{args.port}/api/health")
+        print("\nPress Ctrl+C to stop the server\n")
+
+        uvicorn.run(
+            "main:app",
+            host=args.host,
+            port=args.port,
+            reload=False,
+            log_level="info"
+        )
+        return
+
     # Set environment variables for MCP clients
     os.environ["DEMOGRAPHICS_SERVER_URL"] = args.demographics_url
     os.environ["PERFORMANCE_SERVER_URL"] = args.performance_url
