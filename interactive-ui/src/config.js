@@ -24,3 +24,26 @@ export const authConfig = {
   // Resource server URLs that should have the access token attached
   resourceServerURLs: ["http://localhost:8010"]
 };
+
+// MCP Server Configuration
+export const mcpServers = {
+  demographics: {
+    url: "http://localhost:4001/mcp",
+    name: "Patient Demographics Database",
+    description: "Provides anonymized patient population data by geography",
+    tools: [
+      { id: "search_patient_pools", name: "Search Patient Pools" },
+      { id: "get_demographics_by_region", name: "Get Demographics by Region" }
+    ]
+  },
+  performance: {
+    url: "http://localhost:4002/mcp",
+    name: "Site Performance & Capabilities",
+    description: "Tracks historical site performance metrics",
+    tools: [
+      { id: "search_sites", name: "Search Sites" },
+      { id: "get_site_capabilities", name: "Get Site Capabilities" },
+      { id: "get_enrollment_history", name: "Get Enrollment History" }
+    ]
+  }
+};

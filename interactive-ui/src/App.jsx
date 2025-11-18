@@ -8,6 +8,7 @@ import ErrorDisplay from './components/ErrorDisplay'
 import Header from './components/Header'
 import ExampleQueries from './components/ExampleQueries'
 import AuthGuard from './components/AuthGuard'
+import MCPServerControls from './components/MCPServerControls'
 
 function App() {
   const [isLoading, setIsLoading] = useState(false)
@@ -76,6 +77,9 @@ function App() {
         
         <main className="container">
           <div className="main-content">
+            {/* MCP Server Controls */}
+            <MCPServerControls />
+            
             <div className="query-section">
               <QueryForm 
                 onSubmit={handleQuery} 
