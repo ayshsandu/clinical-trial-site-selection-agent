@@ -28,6 +28,8 @@ app.get("/health", (req, res) => {
 app.post("/mcp", async (req, res) => {
   try {
     console.log("Received MCP request:", JSON.stringify(req.body, null, 2));
+    console.log("Authorization header:", req.headers['authorization']);
+
     // console.log("Received MCP request:");
     
     // Create transport for this request

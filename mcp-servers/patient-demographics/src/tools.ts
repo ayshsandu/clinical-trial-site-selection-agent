@@ -7,7 +7,9 @@ import { patientPools, regionDemographics } from "./data.js";
 
 // Zod schemas for validation
 export const SearchPatientPoolsSchema = z.object({
-  disease: z.string().describe("Disease or indication (e.g., 'Type 2 Diabetes', 'Lung Cancer')"),
+  disease: z.string()
+    .optional()
+    .describe("Disease or indication (e.g., 'Type 2 Diabetes', 'Lung Cancer')"),
   region: z.string().describe("Geographic region (e.g., 'US-Northeast', 'US-California')"),
   min_population: z.number().optional().default(0).describe("Minimum patient population size"),
 });
