@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  demographics-server:
+    build:
+      context: ./mcp-servers/patient-demographics
+      dockerfile: Dockerfile
+    container_name: demographics-server
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - clinical-trial-net
+
+  performance-server:
+    build:
+      context: ./mcp-servers/site-performance
+      dockerfile: Dockerfile
+    container_name: performance-server
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - clinical-trial-net
+
+  agent:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    container_name: trial-site-agent
+    depends_on:
+      demographics-server:
+        condition: service_healthy
+      performance-server:
+        condition: service_healthy
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - DEMOGRAPHICS_SERVER_URL=http://demographics-server:3001/mcp
+      - PERFORMANCE_SERVER_URL=http://performance-server:3002/mcp
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    stdin_open: true
+    tty: true
+    networks:
+      - clinical-trial-net
+    volumes:
+      - ./agent/src:/app/src:ro
+
+networks:
+  clinical-trial-net:
+    driver: bridge
