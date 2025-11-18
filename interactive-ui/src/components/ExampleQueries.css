@@ -1,0 +1,70 @@
+.example-queries {
+  background: var(--gray-50);
+  border: 1px dashed var(--gray-300);
+}
+
+.example-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.example-icon {
+  color: var(--warning-orange);
+}
+
+.example-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--gray-900);
+}
+
+.example-description {
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  margin: 0 0 1rem 0;
+}
+
+.example-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.example-card {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.example-card:hover {
+  border-color: var(--primary-blue);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.example-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary-blue);
+  margin: 0 0 0.5rem 0;
+}
+
+.example-card-text {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  margin: 0;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .example-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,83 @@
+.error-display {
+  background: #fef2f2;
+  border: 2px solid #fecaca;
+}
+
+.error-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.error-icon {
+  color: var(--error-red);
+  flex-shrink: 0;
+}
+
+.error-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: #991b1b;
+}
+
+.error-subtitle {
+  font-size: 0.875rem;
+  color: #7f1d1d;
+  margin: 0.25rem 0 0 0;
+}
+
+.error-details {
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.error-details-title {
+  font-weight: 600;
+  color: #991b1b;
+  margin: 0 0 0.5rem 0;
+}
+
+.error-details-text {
+  margin: 0;
+  color: #7f1d1d;
+  font-size: 0.875rem;
+  font-family: monospace;
+}
+
+.error-actions {
+  margin-bottom: 1.5rem;
+}
+
+.error-help {
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+}
+
+.error-help-title {
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 0.75rem 0;
+}
+
+.error-help-list {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: var(--gray-700);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.error-help-list li {
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .error-title {
+    font-size: 1.25rem;
+  }
+}
