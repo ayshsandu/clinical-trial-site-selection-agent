@@ -15,6 +15,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from typing import Optional
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 # Add src to path
@@ -40,6 +41,15 @@ app = FastAPI(
     title="Clinical Trial Site Selection Agent API",
     description="API for running clinical trial site selection queries",
     version="1.0.0"
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
 
 
