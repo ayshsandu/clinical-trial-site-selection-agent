@@ -60,6 +60,7 @@ class TrialSiteSelectionState(TypedDict):
     
     # Input
     user_query: str
+    bearer_token: Optional[str]
     
     # Parsed requirements
     trial_requirements: Optional[TrialRequirements]

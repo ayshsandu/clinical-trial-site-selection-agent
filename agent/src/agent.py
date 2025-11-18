@@ -1,6 +1,7 @@
 """Clinical Trial Site Selection Agent using LangGraph."""
 
 import logging
+from typing import Optional
 from langgraph.graph import StateGraph, END
 from .state import TrialSiteSelectionState
 from .nodes import (
@@ -52,12 +53,13 @@ def create_agent() -> StateGraph:
     return app
 
 
-def run_agent(user_query: str) -> TrialSiteSelectionState:
+def run_agent(user_query: str, bearer_token: Optional[str] = None) -> TrialSiteSelectionState:
     """
     Run the agent with a user query.
     
     Args:
         user_query: User's clinical trial site selection query
+        bearer_token: Optional bearer token for MCP server authentication
         
     Returns:
         Final state with recommendations
@@ -70,6 +72,7 @@ def run_agent(user_query: str) -> TrialSiteSelectionState:
     # Initial state
     initial_state: TrialSiteSelectionState = {
         "user_query": user_query,
+        "bearer_token": bearer_token,
         "trial_requirements": None,
         "patient_demographics": None,
         "site_performance_data": None,
@@ -88,12 +91,13 @@ def run_agent(user_query: str) -> TrialSiteSelectionState:
     return final_state
 
 
-async def run_agent_async(user_query: str) -> TrialSiteSelectionState:
+async def run_agent_async(user_query: str, bearer_token: Optional[str] = None) -> TrialSiteSelectionState:
     """
     Run the agent asynchronously with a user query.
     
     Args:
         user_query: User's clinical trial site selection query
+        bearer_token: Optional bearer token for MCP server authentication
         
     Returns:
         Final state with recommendations
@@ -106,6 +110,7 @@ async def run_agent_async(user_query: str) -> TrialSiteSelectionState:
     # Initial state
     initial_state: TrialSiteSelectionState = {
         "user_query": user_query,
+        "bearer_token": bearer_token,
         "trial_requirements": None,
         "patient_demographics": None,
         "site_performance_data": None,

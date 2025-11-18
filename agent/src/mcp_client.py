@@ -11,14 +11,16 @@ logger = logging.getLogger(__name__)
 class MCPClient:
     """Client for communicating with MCP servers using LangChain MCP adapters."""
 
-    def __init__(self, server_url: str):
+    def __init__(self, server_url: str, bearer_token: Optional[str] = None):
         """
         Initialize MCP client.
 
         Args:
             server_url: Base URL of the MCP server (e.g., http://localhost:4001/mcp)
+            bearer_token: Optional bearer token for authentication
         """
         self.server_url = server_url
+        self.bearer_token = bearer_token
         self._tools = []
         self._initialized = False
 
@@ -26,12 +28,20 @@ class MCPClient:
         """Ensure the client is initialized and tools are loaded."""
         if not self._initialized:
             # Create a MultiServerMCPClient with just this server
-            client = MultiServerMCPClient({
+            config = {
                 "server": {
                     "url": self.server_url,
                     "transport": "streamable_http",
                 }
-            })
+            }
+            
+            # Add authorization header if bearer token is provided
+            if self.bearer_token:
+                config["server"]["headers"] = {
+                    "Authorization": f"Bearer {self.bearer_token}"
+                }
+            
+            client = MultiServerMCPClient(config)
             self._tools = await client.get_tools()
             self._initialized = True
             logger.info(f"Loaded {len(self._tools)} tools from {self.server_url}")
@@ -171,7 +181,8 @@ class MCPClientManager:
     def __init__(
         self,
         demographics_url: str,
-        performance_url: str
+        performance_url: str,
+        bearer_token: Optional[str] = None
     ):
         """
         Initialize MCP client manager.
@@ -179,9 +190,10 @@ class MCPClientManager:
         Args:
             demographics_url: URL of demographics MCP server
             performance_url: URL of performance MCP server
+            bearer_token: Optional bearer token for authentication
         """
-        self.demographics_client = MCPClient(demographics_url)
-        self.performance_client = MCPClient(performance_url)
+        self.demographics_client = MCPClient(demographics_url, bearer_token)
+        self.performance_client = MCPClient(performance_url, bearer_token)
 
         logger.info("MCP Client Manager initialized")
         logger.info(f"Demographics server: {demographics_url}")

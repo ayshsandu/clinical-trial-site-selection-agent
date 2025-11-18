@@ -87,8 +87,11 @@ async def run_query(request: QueryRequest, token_payload: dict = Depends(validat
     try:
         logger.info(f"API request: {request.query}")
 
+        # Extract bearer token
+        bearer_token = token_payload.get("token") if not token_payload.get("anonymous") else None
+
         # Run the agent
-        final_state = run_agent(request.query)
+        final_state = run_agent(request.query, bearer_token=bearer_token)
 
         # Check for errors
         if final_state.get("error_message"):

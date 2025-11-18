@@ -32,9 +32,10 @@ def query_performance(state: TrialSiteSelectionState) -> TrialSiteSelectionState
         }
     
     performance_url = os.getenv("PERFORMANCE_SERVER_URL", "http://localhost:4002/mcp")
+    bearer_token = state.get("bearer_token")
     
     try:
-        with MCPClient(performance_url) as client:
+        with MCPClient(performance_url, bearer_token) as client:
             sites = []
             capabilities = []
             histories = []

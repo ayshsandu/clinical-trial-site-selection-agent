@@ -30,9 +30,10 @@ def query_demographics(state: TrialSiteSelectionState) -> TrialSiteSelectionStat
         }
     
     demographics_url = os.getenv("DEMOGRAPHICS_SERVER_URL", "http://localhost:4001/mcp")
+    bearer_token = state.get("bearer_token")
     
     try:
-        with MCPClient(demographics_url) as client:
+        with MCPClient(demographics_url, bearer_token) as client:
             pools = []
             regions = []
             audit_entries = []

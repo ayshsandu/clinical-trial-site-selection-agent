@@ -44,7 +44,7 @@ def validate_token(credentials: HTTPAuthorizationCredentials = Depends(security)
         credentials: HTTP authorization credentials containing the bearer token
 
     Returns:
-        dict: Decoded JWT payload
+        dict: Decoded JWT payload with 'token' key containing the original token
 
     Raises:
         HTTPException: If token is invalid, expired, or JWKS fetch fails
@@ -53,7 +53,7 @@ def validate_token(credentials: HTTPAuthorizationCredentials = Depends(security)
     jwks_url = get_jwks_url()
     if not jwks_url:
         # No authentication required
-        return {"anonymous": True}
+        return {"anonymous": True, "token": None}
 
     if not credentials:
         raise HTTPException(
@@ -100,6 +100,8 @@ def validate_token(credentials: HTTPAuthorizationCredentials = Depends(security)
         logger.info("Decoding token")
         payload = jwt.decode(token, key=key, algorithms=["RS256"], options={"verify_aud": False})
 
+        # Return payload with original token
+        payload["token"] = token
         return payload
 
     except jwt.ExpiredSignatureError:
