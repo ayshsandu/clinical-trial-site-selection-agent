@@ -4,7 +4,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import cors from 'cors';
 import { McpAuthServer } from '@asgardeo/mcp-express';
 import 'dotenv/config';
-import { logRequestDetails } from './authLogger.js';
+import { logRequestDetails, getAuthLogs } from './authLogger.js';
 
 const PORT = process.env.PORT || 4002;
 const app = express();
@@ -34,6 +34,11 @@ app.use(
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.json({ status: "healthy", server: "site-performance" });
+});
+
+// Auth logs endpoint
+app.get("/auth-logs", (req, res) => {
+  res.json(getAuthLogs());
 });
 
 // MCP endpoint - StreamableHTTP transport
