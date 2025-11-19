@@ -2,6 +2,8 @@ import express from "express";
 import { createServer } from "./server.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import cors from 'cors';
+import { McpAuthServer } from '@asgardeo/mcp-express';
+import 'dotenv/config';
 
 const PORT = process.env.PORT || 4002;
 const app = express();
@@ -11,6 +13,14 @@ app.use(express.json());
 
 // Create MCP server
 const mcpServer = createServer();
+
+// Initialize MCP Auth Server
+const mcpAuthServer = new McpAuthServer({
+  baseUrl: process.env.AUTH_SERVER_BASE_URL as string,
+  issuer: process.env.ISSUER as string,
+  resource: `http://localhost:${PORT}/mcp`, // MCP server URL
+});
+app.use(mcpAuthServer.router());
 
 //handle CORS
 app.use(
@@ -26,7 +36,7 @@ app.get("/health", (req, res) => {
 });
 
 // MCP endpoint - StreamableHTTP transport
-app.post("/mcp", async (req, res) => {
+app.post("/mcp", mcpAuthServer.protect(), async (req, res) => {
   try {
     console.log("Received MCP request:", JSON.stringify(req.body, null, 2));
     //log authotization header
