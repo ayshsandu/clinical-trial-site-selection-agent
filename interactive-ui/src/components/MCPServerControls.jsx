@@ -20,6 +20,7 @@ function MCPServerControls() {
     demographics: false,
     performance: false
   })
+  const [isAuthReady, setIsAuthReady] = useState(false)
 
   const { getAccessToken } = useAuthContext()
   const currentServer = mcpServers[activeServer]
@@ -31,17 +32,21 @@ function MCPServerControls() {
         const token = await getAccessToken()
         console.log('Setting MCP auth token:', token)
         mcpClientManager.setAuthToken(token)
+        setIsAuthReady(true)
       } catch (err) {
         console.error('Error getting access token:', err)
+        setIsAuthReady(false)
       }
     }
     setToken()
   }, [getAccessToken])
 
-  // Load available tools when server changes
+  // Load available tools when server changes and auth is ready
   useEffect(() => {
-    loadAvailableTools()
-  }, [activeServer])
+    if (isAuthReady) {
+      loadAvailableTools()
+    }
+  }, [activeServer, isAuthReady])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -99,6 +104,14 @@ function MCPServerControls() {
 
   const handleExecute = async () => {
     if (!selectedTool) return
+
+    if (!isAuthReady) {
+      setError({
+        message: 'Authentication not ready',
+        details: 'Please wait for authentication to complete before executing tools.'
+      })
+      return
+    }
 
     setIsLoading(true)
     setError(null)
@@ -277,13 +290,14 @@ function MCPServerControls() {
       <div className="tool-selection">
         <label htmlFor="tool-select" className="tool-label">
           Select Tool {isLoadingTools && <span className="loading-text">(Loading...)</span>}
+          {!isAuthReady && <span className="loading-text">(Authenticating...)</span>}
         </label>
         <select
           id="tool-select"
           className="tool-select"
           value={selectedTool}
           onChange={(e) => handleToolChange(e.target.value)}
-          disabled={isLoading || isLoadingTools}
+          disabled={isLoading || isLoadingTools || !isAuthReady}
         >
           <option value="">-- Choose a tool --</option>
           {/* Use tools from MCP server if available, otherwise fall back to config */}
@@ -325,7 +339,7 @@ function MCPServerControls() {
           <button
             className="btn btn-primary btn-execute"
             onClick={handleExecute}
-            disabled={isLoading}
+            disabled={isLoading || !isAuthReady}
           >
             {isLoading ? (
               <>

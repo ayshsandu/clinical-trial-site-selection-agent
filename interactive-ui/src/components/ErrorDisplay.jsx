@@ -35,7 +35,8 @@ function ErrorDisplay({ error }) {
         <ul className="error-help-list">
           <li>Verify the agent is running on http://localhost:8010</li>
           <li>Check that MCP servers are accessible</li>
-          <li>Ensure your ANTHROPIC_API_KEY is configured</li>
+          <li>Ensure required permissions are available</li>
+          <li>Ensure Agent's Keys are configured</li>
           <li>Review the agent logs for error details</li>
         </ul>
       </div>
