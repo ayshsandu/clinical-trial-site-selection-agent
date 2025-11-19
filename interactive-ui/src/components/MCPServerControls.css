@@ -374,6 +374,31 @@
   margin: 0 0 12px 0;
 }
 
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.btn-close-result {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-close-result:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
 .result-content {
   background: white;
   border: 1px solid #86efac;

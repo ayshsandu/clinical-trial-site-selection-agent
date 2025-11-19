@@ -81,18 +81,20 @@ function LogsViewer({ serverUrl, serverName, onClose }) {
       JSON.stringify(log).toLowerCase().includes(filterText.toLowerCase())
     const matchesTool = filterToolName === '' || 
       (log.toolName && log.toolName.toLowerCase().includes(filterToolName.toLowerCase()))
-    return matchesText && matchesTool
+    return matchesText && matchesTool && log.toolName
   })
 
-  // Group logs by user (sub)
-  const logsByUser = filteredLogs.reduce((acc, log) => {
-    const sub = log.sub || 'unknown'
-    if (!acc[sub]) {
-      acc[sub] = []
-    }
-    acc[sub].push(log)
-    return acc
-  }, {})
+  // Group logs by user (sub) - only include logs with toolName
+  const logsByUser = filteredLogs
+    .filter(log => log.toolName)
+    .reduce((acc, log) => {
+      const sub = log.sub || 'unknown'
+      if (!acc[sub]) {
+        acc[sub] = []
+      }
+      acc[sub].push(log)
+      return acc
+    }, {})
 
   // Get unique tool names for filter
   const uniqueToolNames = [...new Set(logs.map(log => log.toolName).filter(Boolean))]
@@ -177,7 +179,7 @@ function LogsViewer({ serverUrl, serverName, onClose }) {
           <span className="stat-value">{filteredLogs.length}</span>
         </div>
         <div className="stat-item">
-          <span className="stat-label">Unique Users:</span>
+          <span className="stat-label">Unique Requesters:</span>
           <span className="stat-value">{Object.keys(logsByUser).length}</span>
         </div>
         <div className="stat-item">
@@ -185,8 +187,8 @@ function LogsViewer({ serverUrl, serverName, onClose }) {
           <span className="stat-value">{filteredLogs.filter(log => log.toolName).length}</span>
         </div>
         <div className="stat-item">
-          <span className="stat-label">With Agent:</span>
-          <span className="stat-value">{filteredLogs.filter(log => log.act).length}</span>
+          <span className="stat-label">By Agent:</span>
+          <span className="stat-value">{filteredLogs.filter(log => log.sub == "fb0dba08-1621-49f6-82e4-d81094c5de54").length}</span>
         </div>
       </div>
 
@@ -226,8 +228,8 @@ function LogsViewer({ serverUrl, serverName, onClose }) {
                 <thead>
                   <tr>
                     <th>Timestamp</th>
-                    <th>User (Sub)</th>
-                    <th>Agent (Act)</th>
+                    <th>Requester (Sub)</th>
+                    {/* <th>Agent (Act)</th> */}
                     <th>Tool</th>
                     <th>Arguments</th>
                   </tr>
@@ -241,9 +243,9 @@ function LogsViewer({ serverUrl, serverName, onClose }) {
                       <td className="sub-cell">
                         <code>{log.sub ? log.sub.substring(0, 8) + '...' : 'N/A'}</code>
                       </td>
-                      <td className="act-cell">
+                      {/* <td className="act-cell">
                         <code>{log.act ? log.act.substring(0, 8) + '...' : 'N/A'}</code>
-                      </td>
+                      </td> */}
                       <td className="tool-cell">
                         {log.toolName ? (
                           <span className="tool-badge">{log.toolName}</span>
@@ -266,12 +268,12 @@ function LogsViewer({ serverUrl, serverName, onClose }) {
       {/* Grouped View Option */}
       {!isLoading && !error && filteredLogs.length > 0 && (
         <details className="grouped-view">
-          <summary>View Logs Grouped by User</summary>
+          <summary>View Logs Grouped by Requester</summary>
           <div className="grouped-content">
             {Object.entries(logsByUser).map(([sub, userLogs]) => (
               <div key={sub} className="user-group">
                 <h4 className="user-group-header">
-                  User: <code>{sub}</code>
+                  RequesterID: <code>{sub}</code>
                   <span className="user-log-count">({userLogs.length} events)</span>
                 </h4>
                 <div className="user-logs">

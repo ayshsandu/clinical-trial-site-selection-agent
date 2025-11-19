@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Database, Activity, Server, PlayCircle, RefreshCw, FileText } from 'lucide-react'
+import { Database, Activity, Server, PlayCircle, RefreshCw, FileText, X } from 'lucide-react'
 import { useAuthContext } from '@asgardeo/auth-react'
 import { mcpServers } from '../config'
 import { mcpClientManager } from '../utils/mcpClient'
@@ -359,7 +359,16 @@ function MCPServerControls() {
       {/* Results Display */}
       {result && (
         <div className="mcp-result">
-          <h3 className="result-title">Result</h3>
+          <div className="result-header">
+            <h3 className="result-title">Result</h3>
+            <button
+              className="btn-close-result"
+              onClick={() => setResult(null)}
+              title="Close result"
+            >
+              <X size={16} />
+            </button>
+          </div>
           <pre className="result-content">
             {JSON.stringify(result, null, 2)}
           </pre>
