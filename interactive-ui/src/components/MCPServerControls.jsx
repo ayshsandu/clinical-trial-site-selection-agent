@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Database, Activity, Server, PlayCircle, RefreshCw } from 'lucide-react'
+import { Database, Activity, Server, PlayCircle, RefreshCw, FileText } from 'lucide-react'
 import { useAuthContext } from '@asgardeo/auth-react'
 import { mcpServers } from '../config'
 import { mcpClientManager } from '../utils/mcpClient'
+import LogsViewer from './LogsViewer'
 import './MCPServerControls.css'
 
 function MCPServerControls() {
+  const [showLogs, setShowLogs] = useState(false)
   const [activeServer, setActiveServer] = useState('demographics')
   const [selectedTool, setSelectedTool] = useState('')
   const [toolParams, setToolParams] = useState({})
@@ -174,6 +176,17 @@ function MCPServerControls() {
     return toolParameters[toolId] || []
   }
 
+  // If viewing logs, show the logs viewer component
+  if (showLogs) {
+    return (
+      <LogsViewer
+        serverUrl={currentServer.url}
+        serverName={currentServer.name}
+        onClose={() => setShowLogs(false)}
+      />
+    )
+  }
+
   return (
     <div className="mcp-server-controls">
       <div className="mcp-header">
@@ -221,6 +234,17 @@ function MCPServerControls() {
           </div>
         </button>
         <button
+          className="btn-view-logs"
+          onClick={() => {
+            setActiveServer('demographics')
+            setShowLogs(true)
+          }}
+          title="View authentication and activity logs"
+        >
+          <FileText size={16} />
+          Logs
+        </button>
+        <button
           className={`server-tab ${activeServer === 'performance' ? 'active' : ''}`}
           onClick={() => {
             setActiveServer('performance')
@@ -235,6 +259,17 @@ function MCPServerControls() {
             <span className="server-tab-name">Performance</span>
             <span className="server-tab-desc">{mcpServers.performance.description}</span>
           </div>
+        </button>
+        <button
+          className="btn-view-logs"
+          onClick={() => {
+            setActiveServer('performance')
+            setShowLogs(true)
+          }}
+          title="View authentication and activity logs"
+        >
+          <FileText size={16} />
+          Logs
         </button>
       </div>
 
