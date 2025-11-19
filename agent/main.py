@@ -23,10 +23,15 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.agent import run_agent
 from src.nodes import format_report, format_json_report
-from src.auth import validate_token, security, set_jwks_url
+from src.auth import validate_token, security, set_jwks_url, AgentOAuthProvider, set_agent_oauth_provider, get_agent_token
 
 # Load environment variables
-load_dotenv()
+dotenv_path = Path(__file__).parent / ".env"
+if dotenv_path.exists():
+    load_dotenv(dotenv_path)
+    print(f"Loaded environment variables from {dotenv_path}")
+else:
+    print(f".env file not found at {dotenv_path}")
 
 # Configure logging
 logging.basicConfig(
@@ -75,6 +80,49 @@ else:
     logger.warning("JWKS_URL not set - API endpoints will not require authentication")
 
 
+# Configure agent OAuth provider
+agent_client_id = os.getenv("AGENT_CLIENT_ID")
+agent_client_secret = os.getenv("AGENT_CLIENT_SECRET")
+agent_redirect_url = os.getenv("AGENT_REDIRECT_URL", "http://localhost/callback")
+agent_id = os.getenv("AGENT_ID")
+agent_password = os.getenv("AGENT_PASSWORD")
+token_endpoint = os.getenv("TOKEN_ENDPOINT")
+
+# Log agent credentials for debugging
+logger.info(f"AGENT_CLIENT_ID: {'***' if agent_client_id else 'Not set'}")
+logger.info(f"AGENT_CLIENT_SECRET: {'***' if agent_client_secret else 'Not set'}")
+logger.info(f"AGENT_ID: {'***' if agent_id else 'Not set'}")
+logger.info(f"AGENT_PASSWORD: {'***' if agent_password else 'Not set'}")
+logger.info(f"TOKEN_ENDPOINT: {token_endpoint or 'Not set'}")
+
+# Check if we have the required credentials
+has_required_creds = agent_client_id and agent_id and agent_password
+
+if token_endpoint and has_required_creds:
+    agent_provider = AgentOAuthProvider(
+        client_id=agent_client_id,
+        client_secret=agent_client_secret,
+        redirect_url=agent_redirect_url,
+        agent_id=agent_id,
+        agent_password=agent_password,
+        token_endpoint=token_endpoint
+    )
+    set_agent_oauth_provider(agent_provider)
+    logger.info("Agent OAuth provider configured")
+    
+    # Acquire agent token at startup
+    try:
+        agent_token = get_agent_token()
+        if agent_token:
+            logger.info("Agent token acquired successfully at startup")
+        else:
+            logger.warning("Failed to acquire agent token at startup")
+    except Exception as e:
+        logger.warning(f"Failed to acquire agent token at startup: {e}")
+else:
+    logger.info("Agent OAuth provider not configured - required agent credentials not provided")
+
+
 # API endpoints
 @app.post("/api/query", response_model=QueryResponse)
 async def run_query(request: QueryRequest, token_payload: dict = Depends(validate_token)):
@@ -87,8 +135,8 @@ async def run_query(request: QueryRequest, token_payload: dict = Depends(validat
     try:
         logger.info(f"API request: {request.query}")
 
-        # Extract bearer token
-        bearer_token = token_payload.get("token") if not token_payload.get("anonymous") else None
+        # Extract bearer token (prefer agent token if available)
+        bearer_token = (token_payload.get("agent_token") or token_payload.get("token")) if not token_payload.get("anonymous") else None
 
         # Run the agent
         final_state = run_agent(request.query, bearer_token=bearer_token)
