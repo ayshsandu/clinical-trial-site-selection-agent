@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Database, Activity, Server, PlayCircle, RefreshCw } from 'lucide-react'
+import { useAuthContext } from '@asgardeo/auth-react'
 import { mcpServers } from '../config'
 import { mcpClientManager } from '../utils/mcpClient'
 import './MCPServerControls.css'
@@ -18,7 +19,22 @@ function MCPServerControls() {
     performance: false
   })
 
+  const { getAccessToken } = useAuthContext()
   const currentServer = mcpServers[activeServer]
+
+  // Set auth token on mount and when it changes
+  useEffect(() => {
+    const setToken = async () => {
+      try {
+        const token = await getAccessToken()
+        console.log('Setting MCP auth token:', token)
+        mcpClientManager.setAuthToken(token)
+      } catch (err) {
+        console.error('Error getting access token:', err)
+      }
+    }
+    setToken()
+  }, [getAccessToken])
 
   // Load available tools when server changes
   useEffect(() => {

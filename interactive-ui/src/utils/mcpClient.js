@@ -1,7 +1,6 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-// import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
-// import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { SessionOAuthProvider } from './SessionOAuthProvider.js';
 
 /**
  * MCP Client Manager
@@ -10,6 +9,18 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 class MCPClientManager {
   constructor() {
     this.clients = new Map();
+    this.oauthProvider = new SessionOAuthProvider();
+  }
+
+  /**
+   * Set the authorization token to be used in requests
+   * @param {string} token - The authorization token
+   */
+  setAuthToken(token) {
+    console.log('MCPClientManager: Setting auth token');
+    this.oauthProvider.saveTokens({ access_token: token, token_type: 'Bearer' });
+    // Clear existing clients to force reconnection with new token
+    this.disconnectAll();
   }
 
   /**
@@ -23,8 +34,14 @@ class MCPClientManager {
       return this.clients.get(serverUrl);
     }
 
-    // Create new client with SSE transport
-    const transport = new StreamableHTTPClientTransport(new URL(serverUrl));
+    // Create new client with HTTP transport and OAuth provider
+    const transport = new StreamableHTTPClientTransport(
+      new URL(serverUrl),
+      {
+        authProvider: this.oauthProvider
+      }
+    );
+    
     const client = new Client(
       {
         name: 'clinical-trial-ui',
