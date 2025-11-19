@@ -10,7 +10,7 @@ export const SearchPatientPoolsSchema = z.object({
   disease: z.string()
     .optional()
     .describe("Disease or indication (e.g., 'Type 2 Diabetes', 'Lung Cancer')"),
-  region: z.string().describe("Geographic region (e.g., 'US-Northeast', 'US-California')"),
+  region: z.string().optional().describe("Geographic region (e.g., 'US-Northeast', 'US-California')"),
   min_population: z.number().optional().default(0).describe("Minimum patient population size"),
 });
 
@@ -21,15 +21,15 @@ export const GetDemographicsByRegionSchema = z.object({
 
 // Tool implementations
 export function searchPatientPools(params: SearchPatientPoolsParams) {
-  const { disease, region, min_population = 0 } = params;
+  const { disease = "", region = "", min_population = 0 } = params;
 
   // Normalize region search (e.g., "US-Northeast" matches "US-NE-*")
-  const regionPrefix = normalizeRegion(region);
+  const regionPrefix = region ? normalizeRegion(region) : "";
 
   const matchingPools = patientPools.filter((pool) => {
-    const diseaseMatch = pool.disease.toLowerCase().includes(disease.toLowerCase());
-    const regionMatch = pool.region_id.startsWith(regionPrefix) || 
-                        pool.region_name.toLowerCase().includes(region.toLowerCase());
+    const diseaseMatch = !disease || pool.disease.toLowerCase().includes(disease.toLowerCase());
+    const regionMatch = !region || (pool.region_id.startsWith(regionPrefix) || 
+                        pool.region_name.toLowerCase().includes(region.toLowerCase()));
     const populationMatch = pool.estimated_population >= min_population;
 
     return diseaseMatch && regionMatch && populationMatch;

@@ -50,8 +50,8 @@ export interface RegionDemographics {
 }
 
 export interface SearchPatientPoolsParams {
-  disease: string;
-  region: string;
+  disease?: string;
+  region?: string;
   min_population?: number;
 }
 
