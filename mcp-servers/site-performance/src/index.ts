@@ -4,6 +4,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import cors from 'cors';
 import { McpAuthServer } from '@asgardeo/mcp-express';
 import 'dotenv/config';
+import { logRequestDetails } from './authLogger.js';
 
 const PORT = process.env.PORT || 4002;
 const app = express();
@@ -38,10 +39,8 @@ app.get("/health", (req, res) => {
 // MCP endpoint - StreamableHTTP transport
 app.post("/mcp", mcpAuthServer.protect(), async (req, res) => {
   try {
-    console.log("Received MCP request:", JSON.stringify(req.body, null, 2));
-    //log authotization header
-    console.log("Authorization header:", req.headers['authorization']);
-    // console.log("Received MCP request:");
+    // Log request details
+    logRequestDetails(req);
     
     // Create transport for this request
     const transport = new StreamableHTTPServerTransport({
