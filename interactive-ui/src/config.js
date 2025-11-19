@@ -3,7 +3,7 @@
 
 export const authConfig = {
   // The Client ID of your OIDC application registered in Asgardeo
-  clientID: "8kqkhQVQV1SRKYJyJ8KK_XNInHQa",
+  clientID: "Kp3gcfZCdOVmMqas5VnKjZtKYjoa",
   
   // Asgardeo server's host name along with your organization name
   // Format: https://api.asgardeo.io/t/<org_name>
@@ -16,7 +16,7 @@ export const authConfig = {
   signOutRedirectURL: "http://localhost:3000",
   
   // Requested scopes
-  scope: ["openid", "profile", "email"],
+  scope: ["openid", "profile", "email", "query_agent"],
   
   // Enable PKCE for additional security
   enablePKCE: true,

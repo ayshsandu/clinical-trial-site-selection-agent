@@ -229,7 +229,7 @@ function MCPServerControls() {
         >
           <Database size={18} />
           <div className="server-tab-content">
-            <span className="server-tab-name">Demographics</span>
+            <span className="server-tab-name">Demographics MCP</span>
             <span className="server-tab-desc">{mcpServers.demographics.description}</span>
           </div>
         </button>
@@ -256,7 +256,7 @@ function MCPServerControls() {
         >
           <Activity size={18} />
           <div className="server-tab-content">
-            <span className="server-tab-name">Performance</span>
+            <span className="server-tab-name">Performance MCP</span>
             <span className="server-tab-desc">{mcpServers.performance.description}</span>
           </div>
         </button>
