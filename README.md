@@ -38,7 +38,7 @@ This demonstration system helps identify optimal clinical trial sites by analyzi
 1. **LangGraph Agent** (Python) - Orchestrates site selection using Claude
 2. **Patient Demographics MCP Server** (TypeScript) - Provides anonymized patient data
 3. **Site Performance MCP Server** (TypeScript) - Provides site capabilities and history
-4. **Interactive UI** (React) - Web interface for visualizing agent progress and results
+4. **Interactive UI** (React) - Web interface for visualizing agent progress and results, and directly calling MCP servers
 
 ## Prerequisites
 
@@ -240,7 +240,7 @@ curl -X POST http://localhost:3001/mcp \
 
 ## License
 
-MIT
+Apache License 2.0
 
 ## Contributing
 

@@ -1,7 +1,7 @@
 import express from "express";
 import { createServer } from "./server.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import cors from 'cors'; 
+import cors from 'cors';
 import { McpAuthServer } from '@asgardeo/mcp-express';
 import 'dotenv/config';
 import { logRequestDetails, getAuthLogs } from './authLogger.js';
@@ -25,10 +25,10 @@ app.use(mcpAuthServer.router());
 
 //handle CORS
 app.use(
-    cors({
-        origin: '*', // Allow all origins for development; restrict in production (e.g., ['https://your-client-domain.com'])
-        exposedHeaders: ['Mcp-Session-Id'],
-    })
+  cors({
+    origin: '*', // Allow all origins for development; restrict in production (e.g., ['https://your-client-domain.com'])
+    exposedHeaders: ['Mcp-Session-Id'],
+  })
 );
 
 // Health check endpoint
@@ -41,16 +41,16 @@ app.get("/auth-logs", (req, res) => {
   res.json(getAuthLogs());
 });
 // MCP endpoint - StreamableHTTP transport
-app.post("/mcp", mcpAuthServer.protect(),  async (req, res) => {
+app.post("/mcp", mcpAuthServer.protect(), async (req, res) => {
   try {
-    
+
     // Log request details
     logRequestDetails(req);
-    
+
     // Create transport for this request
     const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined,
-        enableJsonResponse: true
+      sessionIdGenerator: undefined,
+      enableJsonResponse: true
     });
     await mcpServer.connect(transport);
     await transport.handleRequest(req, res, req.body);

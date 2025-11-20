@@ -25,11 +25,11 @@ function App() {
     try {
       // Get the access token to include in the API request
       const accessToken = await getAccessToken()
-      
+
       // Set up timeout for the fetch request
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 120000) // 120 second timeout
-      
+
       const response = await fetch('http://localhost:8010/api/query', {
         method: 'POST',
         headers: {
@@ -50,7 +50,7 @@ function App() {
       const data = await response.json()
       console.log('Received data:', data);
       setResults(data)
-      
+
       // Add to query history
       setQueryHistory(prev => [
         { query, timestamp: new Date(), results: data },
@@ -88,29 +88,29 @@ function App() {
     <AuthGuard>
       <div className="app">
         <Header />
-        
+
         <main className="container">
           <div className="main-content">
             {/* MCP Server Controls */}
             <MCPServerControls />
-            
+
             <div className="query-section">
-              <QueryForm 
-                onSubmit={handleQuery} 
+              <QueryForm
+                onSubmit={handleQuery}
                 isLoading={isLoading}
               />
-              
+
               {!isLoading && !results && !error && (
                 <ExampleQueries onSelectExample={handleExampleQuery} />
               )}
             </div>
 
             {isLoading && <LoadingState />}
-            
+
             {error && <ErrorDisplay error={error} />}
-            
+
             {results && !isLoading && (
-              <ResultsDisplay 
+              <ResultsDisplay
                 results={results}
                 queryHistory={queryHistory}
                 onSelectHistory={handleHistoryQuery}
