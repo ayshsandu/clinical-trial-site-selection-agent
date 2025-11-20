@@ -188,7 +188,7 @@ poetry install
 
 # 2. Configure API key
 cp .env.example .env
-# Edit .env and add ANTHROPIC_API_KEY
+# Edit .env and add GOOGLE_API_KEY
 
 # 3. Run
 poetry run python main.py
@@ -207,7 +207,7 @@ python main.py
 
 ✅ Python 3.11+  
 ✅ MCP servers running on ports 4001 and 4002  
-✅ Anthropic API key  
+✅ Gemini API key  
 ✅ Poetry or pip  
 
 ## Performance Characteristics
@@ -322,7 +322,7 @@ Logs include:
 
 ## Troubleshooting
 
-### Issue: "ANTHROPIC_API_KEY not set"
+### Issue: "GOOGLE_API_KEY not set"
 **Solution**: Edit `.env` and add your API key
 
 ### Issue: "Connection refused"

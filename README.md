@@ -288,7 +288,7 @@ curl -X POST http://localhost:4001/mcp \
 ### Agent Connection Issues
 - Verify MCP servers are running: `curl http://localhost:4001/health`
 - Check environment variables in .env
-- Ensure ANTHROPIC_API_KEY is valid
+- Ensure GOOGLE_API_KEY is valid
 
 ### Import Errors
 - Run `npm install` in MCP server directories

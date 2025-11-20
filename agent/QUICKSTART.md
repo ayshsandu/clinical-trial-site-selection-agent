@@ -53,7 +53,7 @@ nano .env  # or use your preferred editor
 
 Your `.env` should look like:
 ```
-ANTHROPIC_API_KEY=sk-ant-your-actual-key-here
+GOOGLE_API_KEY=sk-ant-your-actual-key-here
 DEMOGRAPHICS_SERVER_URL=http://localhost:4001/mcp
 PERFORMANCE_SERVER_URL=http://localhost:4002/mcp
 LOG_LEVEL=INFO
@@ -138,7 +138,7 @@ RECOMMENDED SITES:
 
 ## Troubleshooting
 
-### Error: "ANTHROPIC_API_KEY not set"
+### Error: "GOOGLE_API_KEY not set"
 
 Solution:
 ```bash
@@ -146,10 +146,10 @@ Solution:
 cat .env
 
 # Verify API key is set
-echo $ANTHROPIC_API_KEY
+echo $GOOGLE_API_KEY
 
 # Set it manually if needed
-export ANTHROPIC_API_KEY=sk-ant-your-key
+export GOOGLE_API_KEY=sk-ant-your-key
 ```
 
 ### Error: "Connection refused"
@@ -202,7 +202,7 @@ poetry run python main.py \
 
 - Check logs for detailed error messages (set `LOG_LEVEL=DEBUG` in .env)
 - Verify MCP servers are running with `/health` endpoints
-- Ensure Anthropic API key is valid
+- Ensure Gemini API key is valid
 - Open an issue if you find bugs
 
 Happy site selection! 🎉
