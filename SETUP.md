@@ -13,10 +13,10 @@ This package contains a partial implementation. Follow these steps to complete t
   - ✅ index.ts
   - ✅ package.json
   - ✅ tsconfig.json
-  - ✅ Dockerfile
+  - ✅ package.json
+  - ✅ tsconfig.json
 
 - Project Configuration
-  - ✅ docker-compose.yml
   - ✅ .env.example
   - ✅ .gitignore
   - ✅ README.md
@@ -150,20 +150,7 @@ cp .env.example .env
 ANTHROPIC_API_KEY=sk-ant-your-key-here
 ```
 
-## Docker Deployment
 
-Once all files are created:
-
-```bash
-# Build and start all services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-```
 
 ## Next Steps
 

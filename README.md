@@ -13,17 +13,24 @@ This demonstration system helps identify optimal clinical trial sites by analyzi
 
 ```
 ┌─────────────────────────────────┐
-│   Trial Site Advisor Agent      │
-│        (LangGraph)               │
-└────────────┬────────────────────┘
-             │
-      ┌──────┴──────┐
-      │             │
-┌─────▼────┐  ┌────▼─────────┐
-│ Patient  │  │    Site      │
-│Demographics│  │ Performance │
-│MCP Server│  │ MCP Server   │
-└──────────┘  └──────────────┘
+│         Interactive UI          │
+│            (React)              │
+└─┬──────────────┬──────────────┬─┘
+  │              │              │
+  │              ▼              │
+  │     ┌─────────────────┐     │
+  │     │ Trial Site Agent│     │
+  │     │   (LangGraph)   │     │
+  │     └────────┬────────┘     │
+  │              │              │
+  │       ┌──────┴──────┐       │
+  │       │             │       │
+  ▼       ▼             ▼       ▼
+┌────────────┐   ┌──────────────┐
+│ Patient    │   │    Site      │
+│Demographics│   │ Performance  │
+│MCP Server  │   │ MCP Server   │
+└────────────┘   └──────────────┘
 ```
 
 ## Components
@@ -31,32 +38,17 @@ This demonstration system helps identify optimal clinical trial sites by analyzi
 1. **LangGraph Agent** (Python) - Orchestrates site selection using Claude
 2. **Patient Demographics MCP Server** (TypeScript) - Provides anonymized patient data
 3. **Site Performance MCP Server** (TypeScript) - Provides site capabilities and history
+4. **Interactive UI** (React) - Web interface for visualizing agent progress and results
 
 ## Prerequisites
 
 - Python 3.11+
 - Node.js 18+
-- Docker & Docker Compose (optional)
 - Anthropic API key
 
 ## Quick Start
 
-### Option 1: Docker Compose (Recommended)
-
-```bash
-# 1. Clone and setup
-cd clinical-trial-demo
-cp .env.example .env
-# Edit .env and add your ANTHROPIC_API_KEY
-
-# 2. Start all services
-docker-compose up -d
-
-# 3. Run agent
-docker-compose exec agent python main.py
-```
-
-### Option 2: Manual Setup
+### Manual Setup
 
 ```bash
 # 1. Start MCP Servers
@@ -70,6 +62,10 @@ npm install && npm run build && npm start &
 cd ../../agent
 poetry install
 poetry run python main.py
+
+# 3. Start Interactive UI
+cd ../interactive-ui
+npm install && npm run dev
 ```
 
 ## Project Structure
@@ -87,7 +83,7 @@ clinical-trial-demo/
 ├── mcp-servers/
 │   ├── patient-demographics/  # Demographics MCP server
 │   └── site-performance/      # Performance MCP server
-├── docker-compose.yml
+├── interactive-ui/            # React web interface
 ├── .env.example
 └── README.md
 ```
@@ -215,7 +211,6 @@ curl -X POST http://localhost:3001/mcp \
 ### MCP Server Not Starting
 - Check if ports 3001/3002 are available
 - Verify Node.js version (18+)
-- Check logs: `docker-compose logs demographics-server`
 
 ### Agent Connection Issues
 - Verify MCP servers are running: `curl http://localhost:3001/health`
@@ -238,7 +233,7 @@ curl -X POST http://localhost:3001/mcp \
 
 - [ ] Real database integration
 - [ ] Authentication & authorization
-- [ ] Web UI dashboard
+- [x] Web UI dashboard
 - [ ] Budget estimation integration
 - [ ] ML-based site performance prediction
 - [ ] Real-time enrollment tracking
