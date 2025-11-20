@@ -26,6 +26,10 @@ function App() {
       // Get the access token to include in the API request
       const accessToken = await getAccessToken()
       
+      // Set up timeout for the fetch request
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 120000) // 120 second timeout
+      
       const response = await fetch('http://localhost:8010/api/query', {
         method: 'POST',
         headers: {
@@ -34,7 +38,10 @@ function App() {
           'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ query }),
+        signal: controller.signal,
       })
+
+      clearTimeout(timeoutId) // Clear timeout if request completes
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -52,10 +59,17 @@ function App() {
 
     } catch (err) {
       console.error('Error querying agent:', err)
-      setError({
-        message: err.message || 'Failed to query the agent',
-        details: 'Please ensure the agent is running on http://localhost:8010'
-      })
+      if (err.name === 'AbortError') {
+        setError({
+          message: 'Request timed out',
+          details: 'The query took too long to respond. Please try again or check if the agent is running.'
+        })
+      } else {
+        setError({
+          message: err.message || 'Failed to query the agent',
+          details: 'Please ensure the agent is running on http://localhost:8010'
+        })
+      }
     } finally {
       setIsLoading(false)
     }
