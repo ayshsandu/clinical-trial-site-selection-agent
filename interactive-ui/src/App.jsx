@@ -122,7 +122,7 @@ function App() {
 
         <footer className="footer">
           <div className="container">
-            <p>Clinical Trial Site Selection Agent • Powered by LangGraph & Claude</p>
+            <p>Clinical Trial Site Selection Agent • Powered by Asgardeo</p>
           </div>
         </footer>
       </div>

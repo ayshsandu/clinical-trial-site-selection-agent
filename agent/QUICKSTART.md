@@ -44,7 +44,7 @@ pip install -r requirements.txt
 # Copy example env file
 cp .env.example .env
 
-# Edit .env and add your API key (Google Gemini or Anthropic Claude)
+# Edit .env and add your API key (Google Gemini)
 nano .env  # or use your preferred editor
 
 # Required: GOOGLE_API_KEY=your-api-key-here

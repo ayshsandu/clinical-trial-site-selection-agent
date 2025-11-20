@@ -14,7 +14,7 @@ This is a **fully functional** LangGraph agent with:
    - Parse Requirements: Extract structured data from natural language
    - Query Demographics: Fetch patient population data via MCP
    - Query Performance: Retrieve site capabilities via MCP
-   - Analyze & Rank: Use Claude to score and rank sites
+   - Analyze & Rank: Use Gemini to score and rank sites
    - Generate Report: Format comprehensive recommendations
 
 2. **MCP Integration**
@@ -97,7 +97,7 @@ Queries two MCP servers in parallel:
 
 ### 3. AI-Powered Analysis
 
-Uses Claude to:
+Uses Gemini to:
 - Match sites with patient populations
 - Evaluate historical performance
 - Assess capabilities against requirements
@@ -128,7 +128,7 @@ Text report includes:
 | Component | Technology | Version |
 |-----------|-----------|---------|
 | Agent Framework | LangGraph | 0.2.0+ |
-| LLM | Anthropic Claude | Sonnet 4 |
+| LLM | Google Gemini | Sonnet 4 |
 | Language | Python | 3.11+ |
 | HTTP Client | httpx | 0.27+ |
 | Type Safety | Pydantic | 2.9+ |
@@ -384,8 +384,7 @@ MIT License - Free to use, modify, and distribute
 
 ---
 
-**Built with**: LangGraph, Claude, MCP, Python  
-**Status**: Production-ready demo  
+**Built with**: LangGraph, MCP, Python, React
 **Version**: 1.0.0  
 **Last Updated**: November 2025
 

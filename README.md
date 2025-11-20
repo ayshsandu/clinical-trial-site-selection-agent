@@ -35,7 +35,7 @@ This demonstration system helps identify optimal clinical trial sites by analyzi
 
 ## Components
 
-1. **LangGraph Agent** (Python) - Orchestrates site selection using Claude
+1. **LangGraph Agent** (Python) - Orchestrates site selection using Gemini
 2. **Patient Demographics MCP Server** (TypeScript) - Provides anonymized patient data
 3. **Site Performance MCP Server** (TypeScript) - Provides site capabilities and history
 4. **Interactive UI** (React) - Web interface for visualizing agent progress and results, and directly calling MCP servers
@@ -44,7 +44,7 @@ This demonstration system helps identify optimal clinical trial sites by analyzi
 
 - Python 3.11+
 - Node.js 18+
-- API key for LLM provider (Google Gemini or Anthropic Claude)
+- API key for LLM provider (Google Gemini)
 - Authentication server (Asgardeo or similar) for OAuth
 
 ## Quick Start
@@ -153,7 +153,7 @@ All critical configurations are read from `.env` files in each component directo
 
 #### Agent Configuration (`agent/.env`)
 ```bash
-# API Key for LLM (Google Gemini or Anthropic Claude)
+# API Key for LLM (Google Gemini)
 GOOGLE_API_KEY=your-api-key-here
 
 # MCP Server URLs
