@@ -44,8 +44,11 @@ pip install -r requirements.txt
 # Copy example env file
 cp .env.example .env
 
-# Edit .env and add your Anthropic API key
+# Edit .env and add your API key (Google Gemini or Anthropic Claude)
 nano .env  # or use your preferred editor
+
+# Required: GOOGLE_API_KEY=your-api-key-here
+# Optional: Update MCP server URLs if not using defaults
 ```
 
 Your `.env` should look like:

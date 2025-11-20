@@ -76,7 +76,7 @@ Change the port in `vite.config.js`:
 ```javascript
 export default defineConfig({
   server: {
-    port: 3001, // Change this
+    port: 4001, // Change this
   }
 })
 ```

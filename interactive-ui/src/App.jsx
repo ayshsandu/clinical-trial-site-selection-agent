@@ -9,6 +9,7 @@ import Header from './components/Header'
 import ExampleQueries from './components/ExampleQueries'
 import AuthGuard from './components/AuthGuard'
 import MCPServerControls from './components/MCPServerControls'
+import { agentConfig } from './config'
 
 function App() {
   const [isLoading, setIsLoading] = useState(false)
@@ -30,7 +31,7 @@ function App() {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 120000) // 120 second timeout
 
-      const response = await fetch('http://localhost:8010/api/query', {
+      const response = await fetch(agentConfig.queryUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -30,7 +30,7 @@ export const authConfig = {
   signOutRedirectURL: "http://localhost:5173",
   scope: ["openid", "profile", "email"],
   enablePKCE: true,
-  resourceServerURLs: ["http://localhost:8010"]
+  resourceServerURLs: ["http://localhost:8010","http://localhost:4001/mcp","http://localhost:4002/mcp"]
 };
 ```
 

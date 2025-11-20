@@ -51,13 +51,13 @@ npm run build
 npm start
 ```
 
-The server will start on http://localhost:3001
+The server will start on http://localhost:4001
 
 ## Testing the Demographics Server
 
 ```bash
 # List tools
-curl -X POST http://localhost:3001/mcp \
+curl -X POST http://localhost:4001/mcp \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -66,7 +66,7 @@ curl -X POST http://localhost:3001/mcp \
   }'
 
 # Search patient pools
-curl -X POST http://localhost:3001/mcp \
+curl -X POST http://localhost:4001/mcp \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -88,7 +88,7 @@ The site performance server follows the same pattern as the patient demographics
 
 1. Copy the entire `patient-demographics` directory to `site-performance`
 2. Update package.json name to "site-performance-mcp-server"
-3. Change PORT to 3002 in index.ts
+3. Change PORT to 4002 in index.ts
 4. Replace tools.ts with site-specific tools (see specification)
 5. Replace data.ts with site data (see specification)
 6. Update types.ts with site-related interfaces

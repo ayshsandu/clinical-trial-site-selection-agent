@@ -15,7 +15,7 @@ npm start
 npm run dev
 ```
 
-The server will start on port 3002 (or PORT environment variable).
+The server will start on port 4002 (or PORT environment variable).
 
 ## Available Tools
 
@@ -69,7 +69,7 @@ Get historical enrollment performance for a site.
 
 ## Testing
 ```bash
-curl -X POST http://localhost:3002/mcp \
+curl -X POST http://localhost:4002/mcp \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",

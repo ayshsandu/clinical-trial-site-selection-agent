@@ -44,13 +44,21 @@ This demonstration system helps identify optimal clinical trial sites by analyzi
 
 - Python 3.11+
 - Node.js 18+
-- Anthropic API key
+- API key for LLM provider (Google Gemini or Anthropic Claude)
+- Authentication server (Asgardeo or similar) for OAuth
 
 ## Quick Start
 
 ### Manual Setup
 
 ```bash
+# 0. Configure environment variables
+# Copy and update .env files for each component
+cp agent/.env.example agent/.env
+cp mcp-servers/patient-demographics/.env.example mcp-servers/patient-demographics/.env
+cp mcp-servers/site-performance/.env.example mcp-servers/site-performance/.env
+# Edit the .env files with your actual configuration values
+
 # 1. Start MCP Servers
 cd mcp-servers/patient-demographics
 npm install && npm run build && npm start &
@@ -60,8 +68,8 @@ npm install && npm run build && npm start &
 
 # 2. Start Agent
 cd ../../agent
-poetry install
-poetry run python main.py
+pip install -r requirements.txt  # or poetry install
+python main.py
 
 # 3. Start Interactive UI
 cd ../interactive-ui
@@ -103,11 +111,11 @@ clinical-trial-demo/
 
 ## API Endpoints
 
-### Patient Demographics Server (Port 3001)
+### Patient Demographics Server (Port 4001)
 - `POST /mcp` - MCP protocol endpoint
 - `GET /health` - Health check
 
-### Site Performance Server (Port 3002)
+### Site Performance Server (Port 4002)
 - `POST /mcp` - MCP protocol endpoint
 - `GET /health` - Health check
 
@@ -141,17 +149,82 @@ clinical-trial-demo/
 
 ### Environment Variables
 
-```bash
-# Agent
-ANTHROPIC_API_KEY=sk-ant-...
-DEMOGRAPHICS_SERVER_URL=http://localhost:3001/mcp
-PERFORMANCE_SERVER_URL=http://localhost:3002/mcp
+All critical configurations are read from `.env` files in each component directory. Copy the provided `.env.example` files and update them with your actual values.
 
-# MCP Servers
-PORT_DEMOGRAPHICS=3001
-PORT_PERFORMANCE=3002
-LOG_LEVEL=info
+#### Agent Configuration (`agent/.env`)
+```bash
+# API Key for LLM (Google Gemini or Anthropic Claude)
+GOOGLE_API_KEY=your-api-key-here
+
+# MCP Server URLs
+DEMOGRAPHICS_SERVER_URL=http://localhost:4001/mcp
+PERFORMANCE_SERVER_URL=http://localhost:4002/mcp
+
+# Authentication Configuration
+JWKS_URL=https://your-auth-server/jwks
+AGENT_CLIENT_ID=your-agent-client-id
+AGENT_CLIENT_SECRET=your-agent-client-secret
+AGENT_REDIRECT_URL=http://localhost:8010/callback
+AGENT_ID=your-agent-id
+AGENT_PASSWORD=your-agent-password
+TOKEN_ENDPOINT=https://your-auth-server/oauth2/token
+REQUIRED_SCOPE=query_agent
+
+# Logging
+LOG_LEVEL=INFO
 ```
+
+#### MCP Servers Configuration (`mcp-servers/*/env`)
+```bash
+# Auth Server URLs
+AUTH_SERVER_BASE_URL=https://localhost:9443
+ISSUER=https://localhost:9443/oauth2/token
+
+# Server Ports
+PORT=4001  # or 4002 for site-performance
+
+# Logging
+LOG_LEVEL=info
+
+# For Development Only
+NODE_TLS_REJECT_UNAUTHORIZED=0
+```
+
+#### Interactive UI Configuration (`interactive-ui/.env`)
+```bash
+# Authentication Configuration
+VITE_AUTH_CLIENT_ID=your-client-id
+VITE_AUTH_BASE_URL=https://localhost:9443
+VITE_AUTH_SIGN_IN_REDIRECT_URL=http://localhost:3000
+VITE_AUTH_SIGN_OUT_REDIRECT_URL=http://localhost:3000
+VITE_AUTH_SCOPE=openid,profile,email,query_agent
+VITE_AUTH_RESOURCE_SERVER_URLS=http://localhost:8010
+
+# MCP Server URLs
+VITE_DEMOGRAPHICS_SERVER_URL=http://localhost:4001/mcp
+VITE_PERFORMANCE_SERVER_URL=http://localhost:4002/mcp
+
+# Agent API Configuration
+VITE_AGENT_URL=http://localhost:8010
+AGENT_RESOURCE_URL=http://localhost:8010/api/query
+```
+
+### Setup Instructions
+
+1. Copy `.env.example` files to `.env` in each component directory:
+   ```bash
+   # Agent
+   cp agent/.env.example agent/.env
+
+   # MCP Servers
+   cp mcp-servers/patient-demographics/.env.example mcp-servers/patient-demographics/.env
+   cp mcp-servers/site-performance/.env.example mcp-servers/site-performance/.env
+
+   # Interactive UI
+   cp interactive-ui/.env.example interactive-ui/.env
+   ```
+
+2. Update the `.env` files with your actual configuration values.
 
 ## Development
 
@@ -181,7 +254,7 @@ poetry build
 
 ```bash
 # List available tools
-curl -X POST http://localhost:3001/mcp \
+curl -X POST http://localhost:4001/mcp \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -190,7 +263,7 @@ curl -X POST http://localhost:3001/mcp \
   }'
 
 # Call a tool
-curl -X POST http://localhost:3001/mcp \
+curl -X POST http://localhost:4001/mcp \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -209,11 +282,11 @@ curl -X POST http://localhost:3001/mcp \
 ## Troubleshooting
 
 ### MCP Server Not Starting
-- Check if ports 3001/3002 are available
+- Check if ports 4001/4002 are available
 - Verify Node.js version (18+)
 
 ### Agent Connection Issues
-- Verify MCP servers are running: `curl http://localhost:3001/health`
+- Verify MCP servers are running: `curl http://localhost:4001/health`
 - Check environment variables in .env
 - Ensure ANTHROPIC_API_KEY is valid
 
