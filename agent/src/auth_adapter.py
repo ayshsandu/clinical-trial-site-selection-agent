@@ -22,21 +22,18 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
 
 # Import from local auth_sdk
-# Import from local auth_sdk
 try:
-    from .models import TokenConfig, AuthResult, Session
-    from .core import AuthSDK
-    from .agent_auth import AgentOAuthProvider
-    from .validator import (
+    from .auth_sdk import TokenConfig, AuthSDK, AuthResult, Session, AgentOAuthProvider
+    from .auth_sdk.validator import (
         TokenValidator,
         TokenExpiredError,
         InvalidTokenError,
         ScopeValidationError
     )
-    from .session import SessionManager
-    from .logger import setup_logger
+    from .auth_sdk.session import SessionManager
+    from .auth_sdk.logger import setup_logger
 except ImportError as e:
-    raise ImportError(f"Failed to import auth_sdk components. Error: {e}")
+    raise ImportError(f"Failed to import auth_sdk. Error: {e}")
 
 
 # Custom exception for OBO flow that needs redirect
@@ -172,7 +169,7 @@ def set_required_scope(scope: str):
     _required_scope = scope
 
 
-async def validate_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Union[Dict[str, Any], JSONResponse]:
+def validate_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Union[Dict[str, Any], JSONResponse]:
     """
     Validate OAuth 2.0 Bearer token using AuthSDK's process_request.
     
@@ -221,7 +218,6 @@ async def validate_token(credentials: HTTPAuthorizationCredentials = Depends(sec
         }
         
         # Process request using AuthSDK
-        # Note: process_request is synchronous, but that's fine in async function
         auth_result: AuthResult = _auth_sdk.process_request(request_headers)
         
         if not auth_result.is_authenticated:
@@ -273,7 +269,7 @@ async def validate_token(credentials: HTTPAuthorizationCredentials = Depends(sec
         
         # Get cached agent token if available
         try:
-            agent_token = await get_agent_token()
+            agent_token = get_agent_token()
             if agent_token:
                 payload["agent_token"] = agent_token
                 _logger.debug("Using cached agent token")
@@ -378,7 +374,7 @@ def set_agent_oauth_provider(provider: AgentOAuthProvider):
     _agent_provider = provider
 
 
-async def get_agent_token() -> Optional[str]:
+def get_agent_token() -> Optional[str]:
     """Get the cached agent token, acquiring it if necessary."""
     global _agent_token, _logger
     
@@ -394,8 +390,8 @@ async def get_agent_token() -> Optional[str]:
     # Try to acquire a new token
     if _agent_provider:
         try:
-            _logger.info("Acquiring new agent token from the SDK")
-            tokens = await _agent_provider.acquire_agent_tokens()
+            _logger.info("Acquiring new agent token")
+            tokens = _agent_provider.acquire_agent_tokens()
             _agent_token = tokens
             return tokens.get("access_token")
         except Exception as e:
@@ -499,10 +495,6 @@ def get_token_for_user_context(token_payload: Dict[str, Any]) -> Optional[str]:
     Returns:
         The OBO token, or original user token if OBO not available
     """
-    # For user context, we want the OBO token or original user token
-    # We do NOT want the agent token as that represents the agent's identity, not the user's
-    obo_token = token_payload.get("obo_access_token")
-    if obo_token:
-        return obo_token
-    
-    return token_payload.get("token")
+    # For user context, we still want the OBO token as it represents
+    # the user's delegated access to the agent
+    return get_final_token(token_payload, prefer_obo_token=True)

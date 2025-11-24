@@ -35,64 +35,116 @@ This demonstration system helps identify optimal clinical trial sites by analyzi
 
 ## Components
 
-1. **LangGraph Agent** (Python) - Orchestrates site selection using Gemini
-2. **Patient Demographics MCP Server** (TypeScript) - Provides anonymized patient data
-3. **Site Performance MCP Server** (TypeScript) - Provides site capabilities and history
-4. **Interactive UI** (React) - Web interface for visualizing agent progress and results, and directly calling MCP servers
+1. **LangGraph Agent** (Python) - Orchestrates site selection using Gemini. Includes a complete authentication SDK for secure API access.
+2. **Patient Demographics MCP Server** (TypeScript) - Provides anonymized patient data with OAuth protection
+3. **Site Performance MCP Server** (TypeScript) - Provides site capabilities and history with authentication
+4. **Interactive UI** (React) - Web interface for visualizing agent progress and results, with direct MCP server access
 
 ## Prerequisites
 
-- Python 3.11+
-- Node.js 18+
-- API key for LLM provider (Google Gemini)
-- Authentication server (Asgardeo or similar) for OAuth
+- **Python 3.11+** - For the LangGraph agent (includes complete auth SDK)
+- **Node.js 18+** - For MCP servers and React UI
+- **Google Gemini API Key** - For AI-powered site selection
+- **Authentication Server** (Optional) - Asgardeo or similar for OAuth (demo works without it)
 
 ## Quick Start
 
-### Manual Setup
+### Option 1: Automated Setup (Recommended)
+
+For a streamlined setup experience, follow the individual component guides:
+
+1. **Start MCP Servers** (see `mcp-servers/*/QUICKSTART.md`)
+2. **Setup Agent** (see `agent/QUICKSTART.md`)
+3. **Launch UI** (see `interactive-ui/QUICKSTART.md`)
+
+### Option 2: Manual Setup
 
 ```bash
-# 0. Configure environment variables
+# 1. Configure environment variables
 # Copy and update .env files for each component
+cp .env.example .env  # Root config (optional)
 cp agent/.env.example agent/.env
 cp mcp-servers/patient-demographics/.env.example mcp-servers/patient-demographics/.env
 cp mcp-servers/site-performance/.env.example mcp-servers/site-performance/.env
+cp interactive-ui/.env.example interactive-ui/.env
 # Edit the .env files with your actual configuration values
 
-# 1. Start MCP Servers
+# 2. Start MCP Servers (in separate terminals)
 cd mcp-servers/patient-demographics
 npm install && npm run build && npm start &
 
 cd ../site-performance
 npm install && npm run build && npm start &
 
-# 2. Start Agent
+# 3. Start Agent (in new terminal)
 cd ../../agent
 pip install -r requirements.txt  # or poetry install
 python main.py
 
-# 3. Start Interactive UI
+# 4. Start Interactive UI (in new terminal)
 cd ../interactive-ui
 npm install && npm run dev
 ```
+
+### First Test
+
+1. Open `http://localhost:3000` in your browser
+2. Try a query: "Find sites for Phase III diabetes trial in Northeast US"
+3. Results should appear in 30-60 seconds
+
+### Prerequisites Check
+
+```bash
+# Python 3.11+
+python --version
+
+# Node.js 18+
+node --version
+
+# Check MCP servers (after starting)
+curl http://localhost:4001/health
+curl http://localhost:4002/health
+```
+
+**📖 Detailed Setup Guides**: Each component has detailed setup instructions:
+- `agent/QUICKSTART.md` - Agent setup and usage
+- `interactive-ui/QUICKSTART.md` - UI setup
+- `mcp-servers/*/QUICKSTART.md` - MCP server quick starts
 
 ## Project Structure
 
 ```
 clinical-trial-demo/
-├── agent/                      # LangGraph agent
+├── agent/                      # LangGraph agent (self-contained with auth SDK)
 │   ├── src/
 │   │   ├── agent.py           # Main agent graph
+│   │   ├── auth_sdk/          # Local authentication SDK
+│   │   │   ├── core.py        # AuthSDK main class
+│   │   │   ├── agent_auth.py  # Agent OAuth provider
+│   │   │   ├── validator.py   # Token validation
+│   │   │   └── ...            # Other auth modules
 │   │   ├── state.py           # State definitions
 │   │   ├── nodes/             # Graph nodes
 │   │   └── mcp_client.py      # MCP client wrapper
 │   ├── pyproject.toml
-│   └── main.py
+│   ├── main.py
+│   ├── QUICKSTART.md          # Agent setup guide
+│   └── README.md
 ├── mcp-servers/
 │   ├── patient-demographics/  # Demographics MCP server
+│   │   ├── src/
+│   │   ├── package.json
+│   │   └── tsconfig.json
 │   └── site-performance/      # Performance MCP server
+│       ├── src/
+│       ├── package.json
+│       └── tsconfig.json
 ├── interactive-ui/            # React web interface
-├── .env.example
+│   ├── src/
+│   ├── package.json
+│   ├── QUICKSTART.md          # UI setup guide
+│   └── README.md
+├── .env.example               # Root environment template
 └── README.md
 ```
 
@@ -118,6 +170,18 @@ clinical-trial-demo/
 ### Site Performance Server (Port 4002)
 - `POST /mcp` - MCP protocol endpoint
 - `GET /health` - Health check
+
+## Authentication
+
+The agent includes a complete authentication SDK (`agent/src/auth_sdk/`) that handles:
+
+- OAuth 2.0 On-Behalf-Of (OBO) flows
+- JWT token validation with JWKS
+- Agent identity authentication
+- Session management
+- Scope-based access control
+
+This makes the agent **completely self-contained** - no external authentication dependencies required for development and testing.
 
 ## MCP Tools
 
@@ -153,25 +217,37 @@ All critical configurations are read from `.env` files in each component directo
 
 #### Agent Configuration (`agent/.env`)
 ```bash
-# API Key for LLM (Google Gemini)
+# Google API Key (required)
+# Get your API key from: https://aistudio.google.com/app/apikey
 GOOGLE_API_KEY=your-api-key-here
 
 # MCP Server URLs
 DEMOGRAPHICS_SERVER_URL=http://localhost:4001/mcp
 PERFORMANCE_SERVER_URL=http://localhost:4002/mcp
 
-# Authentication Configuration
-JWKS_URL=https://your-auth-server/jwks
-AGENT_CLIENT_ID=your-agent-client-id
-AGENT_CLIENT_SECRET=your-agent-client-secret
-AGENT_REDIRECT_URL=http://localhost:8010/callback
-AGENT_ID=your-agent-id
-AGENT_PASSWORD=your-agent-password
-TOKEN_ENDPOINT=https://your-auth-server/oauth2/token
-REQUIRED_SCOPE=query_agent
+# OAuth 2.0 JWKS URL (required for API mode)
+JWKS_URL=https://your-auth-server/.well-known/jwks.json
 
 # Logging
-LOG_LEVEL=INFO
+LOG_LEVEL=DEBUG
+
+# Token Validation Configuration
+TOKEN_AUDIENCE=your-audience
+TOKEN_ISSUER=https://your-auth-server/oauth2/token
+REQUIRED_SCOPE=query_agent
+
+# OBO (On-Behalf-Of) Flow Configuration
+AUTHORIZATION_ENDPOINT=https://your-auth-server/oauth2/authorize
+TOKEN_ENDPOINT=https://your-auth-server/oauth2/token
+AGENT_REDIRECT_URI=http://localhost:8010/auth/callback
+REQUESTING_SCOPES=openid profile email
+
+# Agent Authentication (for agent identity)
+AGENT_CLIENT_ID=your-agent-client-id
+AGENT_CLIENT_SECRET=your-agent-client-secret
+AGENT_REDIRECT_URL=http://localhost:8080/callback
+AGENT_ID=your-agent-id
+AGENT_PASSWORD=your-agent-password
 ```
 
 #### MCP Servers Configuration (`mcp-servers/*/env`)
@@ -192,17 +268,22 @@ NODE_TLS_REJECT_UNAUTHORIZED=0
 
 #### Interactive UI Configuration (`interactive-ui/.env`)
 ```bash
-# Authentication Configuration
-VITE_AUTH_CLIENT_ID=your-client-id
-VITE_AUTH_BASE_URL=https://localhost:9443
-VITE_AUTH_SIGN_IN_REDIRECT_URL=http://localhost:3000
-VITE_AUTH_SIGN_OUT_REDIRECT_URL=http://localhost:3000
-VITE_AUTH_SCOPE=openid,profile,email,query_agent
-VITE_AUTH_RESOURCE_SERVER_URLS=http://localhost:8010
-
 # MCP Server URLs
 VITE_DEMOGRAPHICS_SERVER_URL=http://localhost:4001/mcp
 VITE_PERFORMANCE_SERVER_URL=http://localhost:4002/mcp
+
+# Agent Resource Server URLs
+VITE_AGENT_URL=http://localhost:8010
+
+# Authentication Configuration
+VITE_AUTH_CLIENT_ID=your-client-id
+
+# Auth Server Base URL, for Asgardeo use https://api.asgardeo.io/t/<your-tenant>
+VITE_AUTH_SERVER_BASE_URL=https://localhost:9443
+VITE_AUTH_SIGN_IN_REDIRECT_URL=http://localhost:3000
+VITE_AUTH_SIGN_OUT_REDIRECT_URL=http://localhost:3000
+VITE_AUTH_SCOPE=openid,profile,email,query_agent
+VITE_AUTH_RESOURCE_SERVER_URLS=[${VITE_DEMOGRAPHICS_SERVER_URL},${VITE_PERFORMANCE_SERVER_URL},${VITE_AGENT_URL}]
 
 # Agent API Configuration
 VITE_AGENT_URL=http://localhost:8010
@@ -252,10 +333,13 @@ poetry build
 
 ## Testing MCP Servers
 
+**Note:** MCP servers require authentication. Include a valid JWT bearer token in requests.
+
 ```bash
 # List available tools
 curl -X POST http://localhost:4001/mcp \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN_HERE" \
   -d '{
     "jsonrpc": "2.0",
     "id": 1,
@@ -265,6 +349,7 @@ curl -X POST http://localhost:4001/mcp \
 # Call a tool
 curl -X POST http://localhost:4001/mcp \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN_HERE" \
   -d '{
     "jsonrpc": "2.0",
     "id": 2,
@@ -285,10 +370,17 @@ curl -X POST http://localhost:4001/mcp \
 - Check if ports 4001/4002 are available
 - Verify Node.js version (18+)
 
+### Authentication Errors
+- Ensure `.env` files are configured with correct auth server URLs
+- Verify JWT tokens are valid and not expired
+- Check that required scopes are present in tokens
+- For direct API testing, obtain valid bearer tokens from your auth server
+
 ### Agent Connection Issues
 - Verify MCP servers are running: `curl http://localhost:4001/health`
 - Check environment variables in .env
 - Ensure GOOGLE_API_KEY is valid
+- Verify authentication is configured (JWKS_URL, client credentials)
 
 ### Import Errors
 - Run `npm install` in MCP server directories
@@ -305,7 +397,7 @@ curl -X POST http://localhost:4001/mcp \
 ## Future Enhancements
 
 - [ ] Real database integration
-- [ ] Authentication & authorization
+- [x] Authentication & authorization (SDK included)
 - [x] Web UI dashboard
 - [ ] Budget estimation integration
 - [ ] ML-based site performance prediction
