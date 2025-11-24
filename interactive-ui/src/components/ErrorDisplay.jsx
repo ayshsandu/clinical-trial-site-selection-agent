@@ -1,9 +1,17 @@
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import { AlertCircle, RefreshCw, ExternalLink } from 'lucide-react'
 import './ErrorDisplay.css'
 
 function ErrorDisplay({ error }) {
   const handleRetry = () => {
     window.location.reload()
+  }
+
+  const is401 = error.response && error.response.status === 401
+  const authUrl = is401 && error.response.headers ? error.response.headers.get('x-auth-redirect-url') : null
+  const handleOAuth = () => {
+    if (authUrl) {
+      window.open(authUrl, '_blank')
+    }
   }
 
   return (
@@ -20,6 +28,22 @@ function ErrorDisplay({ error }) {
         <div className="error-details">
           <p className="error-details-title">Details:</p>
           <p className="error-details-text">{error.details}</p>
+        </div>
+      )}
+
+      {authUrl && (
+        <div className="error-oauth">
+          <p className="error-oauth-title">Authorization Required:</p>
+          <p className="error-oauth-text">
+            You need to authorize access to the query service. Click the button below to start the OAuth flow in a new tab.
+          </p>
+          <button onClick={handleOAuth} className="btn btn-auth">
+            <ExternalLink size={20} />
+            Authorize Access
+          </button>
+          <p className="error-oauth-instruction">
+            After completing authorization, return here and click "Try Again" to retry your request.
+          </p>
         </div>
       )}
 

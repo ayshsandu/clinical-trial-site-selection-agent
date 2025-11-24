@@ -22,6 +22,7 @@ uvicorn = "^0.24.0"
 nest_asyncio = "^1.6.0"
 PyJWT = "^2.8.0"
 requests = "^2.31.0"
+auth-utils = {path = "../auth_utils", develop = true}
 
 [tool.poetry.dev-dependencies]
 pytest = "^8.0.0"

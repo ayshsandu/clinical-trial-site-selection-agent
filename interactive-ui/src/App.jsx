@@ -45,7 +45,9 @@ function App() {
       clearTimeout(timeoutId) // Clear timeout if request completes
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const error = new Error(`HTTP error! status: ${response.status}`)
+        error.response = response
+        throw error
       }
 
       const data = await response.json()
@@ -66,10 +68,9 @@ function App() {
           details: 'The query took too long to respond. Please try again or check if the agent is running.'
         })
       } else {
-        setError({
-          message: err.message || 'Failed to query the agent',
-          details: 'Please ensure the agent is running on http://localhost:8010'
-        })
+        const error = new Error(`HTTP error! status: ${err.status}`)
+        error.response = err
+        setError(err)
       }
     } finally {
       setIsLoading(false)

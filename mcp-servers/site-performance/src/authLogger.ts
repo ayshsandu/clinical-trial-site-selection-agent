@@ -14,9 +14,10 @@ const authLogs: AuthLogEntry[] = [];
 export function logRequestDetails(req: Request) {
   const authHeader = req.headers['authorization'];
   if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
+    const token = authHeader.substring(7);   
     try {
       const decoded = jwt.decode(token) as any;
+      console.log('DECODED TOKEN:', decoded);
       const sub = decoded?.sub;
       const act = decoded?.act?.sub;
       const toolName = req.body?.params?.name;

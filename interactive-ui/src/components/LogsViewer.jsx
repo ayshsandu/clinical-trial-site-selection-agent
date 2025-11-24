@@ -229,7 +229,7 @@ function LogsViewer({ serverUrl, serverName, onClose }) {
                   <tr>
                     <th>Timestamp</th>
                     <th>Requester (Sub)</th>
-                    {/* <th>Agent (Act)</th> */}
+                    <th>Agent (Act)</th>
                     <th>Tool</th>
                     <th>Arguments</th>
                   </tr>
@@ -243,9 +243,9 @@ function LogsViewer({ serverUrl, serverName, onClose }) {
                       <td className="sub-cell">
                         <code>{log.sub ? log.sub.substring(0, 8) + '...' : 'N/A'}</code>
                       </td>
-                      {/* <td className="act-cell">
+                      <td className="act-cell">
                         <code>{log.act ? log.act.substring(0, 8) + '...' : 'N/A'}</code>
-                      </td> */}
+                      </td>
                       <td className="tool-cell">
                         {log.toolName ? (
                           <span className="tool-badge">{log.toolName}</span>

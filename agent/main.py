@@ -23,8 +23,17 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.agent import run_agent
 from src.nodes import format_report, format_json_report
-from src.auth import validate_token, security, set_jwks_url
-from src.agent_auth import AgentOAuthProvider, set_agent_oauth_provider, get_agent_token
+from src.auth_adapter import (
+    validate_token, 
+    set_jwks_url, 
+    AgentOAuthProvider, 
+    set_agent_oauth_provider, 
+    get_agent_token, 
+    get_token_for_mcp,
+    handle_oauth_callback
+)
+
+from fastapi.responses import JSONResponse
 
 # Load environment variables
 dotenv_path = Path(__file__).parent / ".env"
@@ -106,7 +115,8 @@ if token_endpoint and has_required_creds:
         redirect_url=agent_redirect_url,
         agent_id=agent_id,
         agent_password=agent_password,
-        token_endpoint=token_endpoint
+        token_endpoint=token_endpoint,
+        ssl_verify=False  # For development with self-signed certificates
     )
     set_agent_oauth_provider(agent_provider)
     logger.info("Agent OAuth provider configured")
@@ -126,18 +136,22 @@ else:
 
 # API endpoints
 @app.post("/api/query", response_model=QueryResponse)
-async def run_query(request: QueryRequest, token_payload: dict = Depends(validate_token)):
+async def run_query(request: QueryRequest, token_payload = Depends(validate_token)):
     """
     Run a clinical trial site selection query.
 
     - **query**: The clinical trial site selection query
     - **format**: Response format ("text" or "json")
     """
+    # If validate_token returned a JSONResponse (401), return it directly
+    if isinstance(token_payload, JSONResponse):
+        return token_payload
+    
     try:
         logger.info(f"API request: {request.query}")
 
-        # Extract bearer token (prefer agent token if available)
-        bearer_token = (token_payload.get("agent_token") or token_payload.get("token")) if not token_payload.get("anonymous") else None
+        # Extract bearer token using the auth utils
+        bearer_token = get_token_for_mcp(token_payload)
 
         # Run the agent
         final_state = run_agent(request.query, bearer_token=bearer_token)
@@ -162,6 +176,33 @@ async def run_query(request: QueryRequest, token_payload: dict = Depends(validat
 async def health_check():
     """Health check endpoint."""
     return {"status": "healthy", "service": "clinical-trial-agent"}
+
+
+@app.get("/auth/callback")
+async def oauth_callback(code: str, state: str):
+    """
+    OAuth callback endpoint for OBO flow.
+    
+    This endpoint is called by the OAuth provider after user authorization.
+    
+    - **code**: Authorization code from OAuth provider
+    - **state**: State parameter for CSRF protection
+    """
+    try:
+        logger.info(f"Received OAuth callback with state: {state}")
+        result = handle_oauth_callback(code, state)
+        logger.info(f"OAuth callback processed successfully: {result}")
+        
+        # Return a simple success page
+        return {
+            "success": True,
+            "message": "Authentication successful! You can close this window and retry your request.",
+            "jti": result.get("jti"),
+            "user_id": result.get("user_id")
+        }
+    except Exception as e:
+        logger.exception("Error processing OAuth callback")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 def main() -> None:
