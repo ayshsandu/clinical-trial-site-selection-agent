@@ -172,7 +172,7 @@ def set_required_scope(scope: str):
     _required_scope = scope
 
 
-def validate_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Union[Dict[str, Any], JSONResponse]:
+async def validate_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Union[Dict[str, Any], JSONResponse]:
     """
     Validate OAuth 2.0 Bearer token using AuthSDK's process_request.
     
@@ -221,6 +221,7 @@ def validate_token(credentials: HTTPAuthorizationCredentials = Depends(security)
         }
         
         # Process request using AuthSDK
+        # Note: process_request is synchronous, but that's fine in async function
         auth_result: AuthResult = _auth_sdk.process_request(request_headers)
         
         if not auth_result.is_authenticated:
@@ -272,7 +273,7 @@ def validate_token(credentials: HTTPAuthorizationCredentials = Depends(security)
         
         # Get cached agent token if available
         try:
-            agent_token = get_agent_token()
+            agent_token = await get_agent_token()
             if agent_token:
                 payload["agent_token"] = agent_token
                 _logger.debug("Using cached agent token")
@@ -377,7 +378,7 @@ def set_agent_oauth_provider(provider: AgentOAuthProvider):
     _agent_provider = provider
 
 
-def get_agent_token() -> Optional[str]:
+async def get_agent_token() -> Optional[str]:
     """Get the cached agent token, acquiring it if necessary."""
     global _agent_token, _logger
     
@@ -393,8 +394,8 @@ def get_agent_token() -> Optional[str]:
     # Try to acquire a new token
     if _agent_provider:
         try:
-            _logger.info("Acquiring new agent token")
-            tokens = _agent_provider.acquire_agent_tokens()
+            _logger.info("Acquiring new agent token from the SDK")
+            tokens = await _agent_provider.acquire_agent_tokens()
             _agent_token = tokens
             return tokens.get("access_token")
         except Exception as e:

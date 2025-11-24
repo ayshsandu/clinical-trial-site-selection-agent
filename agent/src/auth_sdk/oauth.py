@@ -6,15 +6,23 @@ from urllib.parse import urlencode
 from .models import TokenConfig, Session
 from .logger import setup_logger
 
+def generate_code_verifier() -> str:
+    """Generate a random code verifier for PKCE."""
+    return secrets.token_urlsafe(64)
+
+def generate_code_challenge(verifier: str) -> str:
+    """Generate code challenge from verifier using S256."""
+    digest = hashlib.sha256(verifier.encode()).digest()
+    return base64.urlsafe_b64encode(digest).decode().rstrip("=")
+
 class OAuthClient:
     def __init__(self, config: TokenConfig):
         self.config = config
         self.logger = setup_logger(__name__, config.log_level)
 
     def _generate_pkce_pair(self) -> tuple[str, str]:
-        verifier = secrets.token_urlsafe(64)
-        digest = hashlib.sha256(verifier.encode()).digest()
-        challenge = base64.urlsafe_b64encode(digest).decode().rstrip("=")
+        verifier = generate_code_verifier()
+        challenge = generate_code_challenge(verifier)
         return verifier, challenge
 
     def create_authorization_url(self, session: Session) -> str:
@@ -50,8 +58,7 @@ class OAuthClient:
             "code_verifier": session.pkce_verifier,
         }
         
-        # if self.config.client_secret:
-        #     data["client_secret"] = self.config.client_secret
+
 
         try:
             self.logger.info(f"Exchanging authorization code for tokens at {self.config.token_endpoint}")

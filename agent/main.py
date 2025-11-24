@@ -11,6 +11,7 @@ import logging
 import argparse
 import json
 import uvicorn
+import asyncio
 from pathlib import Path
 from dotenv import load_dotenv
 from typing import Optional, Any
