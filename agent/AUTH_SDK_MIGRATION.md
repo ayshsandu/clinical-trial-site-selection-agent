@@ -31,10 +31,12 @@ from auth_sdk.logger import setup_logger
 **After:**
 ```python
 # Import from local auth_sdk
-from .auth_sdk import TokenConfig, AuthSDK, AuthResult, Session, AgentOAuthProvider
-from .auth_sdk.validator import (...)
-from .auth_sdk.session import SessionManager
-from .auth_sdk.logger import setup_logger
+from .models import TokenConfig, AuthResult, Session
+from .core import AuthSDK
+from .agent_auth import AgentOAuthProvider
+from .validator import (...)
+from .session import SessionManager
+from .logger import setup_logger
 ```
 
 ## Directory Structure
@@ -45,6 +47,7 @@ agent/
 │   ├── auth_sdk/              # ← NEW: Local auth_sdk
 │   │   ├── __init__.py
 │   │   ├── agent_auth.py      # Agent OAuth provider
+│   │   ├── auth_adapter.py    # ← MOVED: Adapter now inside SDK
 │   │   ├── core.py            # AuthSDK main class
 │   │   ├── logger.py          # Logging utilities
 │   │   ├── models.py          # Data models
@@ -52,7 +55,6 @@ agent/
 │   │   ├── server.py          # Local callback server
 │   │   ├── session.py         # Session manager
 │   │   └── validator.py       # Token validator
-│   ├── auth_adapter.py        # ← UPDATED: Uses local auth_sdk
 │   ├── agent.py
 │   ├── client.py
 │   ├── mcp_client.py

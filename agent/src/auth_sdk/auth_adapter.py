@@ -22,18 +22,21 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
 
 # Import from local auth_sdk
+# Import from local auth_sdk
 try:
-    from .auth_sdk import TokenConfig, AuthSDK, AuthResult, Session, AgentOAuthProvider
-    from .auth_sdk.validator import (
+    from .models import TokenConfig, AuthResult, Session
+    from .core import AuthSDK
+    from .agent_auth import AgentOAuthProvider
+    from .validator import (
         TokenValidator,
         TokenExpiredError,
         InvalidTokenError,
         ScopeValidationError
     )
-    from .auth_sdk.session import SessionManager
-    from .auth_sdk.logger import setup_logger
+    from .session import SessionManager
+    from .logger import setup_logger
 except ImportError as e:
-    raise ImportError(f"Failed to import auth_sdk. Error: {e}")
+    raise ImportError(f"Failed to import auth_sdk components. Error: {e}")
 
 
 # Custom exception for OBO flow that needs redirect
@@ -495,6 +498,10 @@ def get_token_for_user_context(token_payload: Dict[str, Any]) -> Optional[str]:
     Returns:
         The OBO token, or original user token if OBO not available
     """
-    # For user context, we still want the OBO token as it represents
-    # the user's delegated access to the agent
-    return get_final_token(token_payload, prefer_obo_token=True)
+    # For user context, we want the OBO token or original user token
+    # We do NOT want the agent token as that represents the agent's identity, not the user's
+    obo_token = token_payload.get("obo_access_token")
+    if obo_token:
+        return obo_token
+    
+    return token_payload.get("token")

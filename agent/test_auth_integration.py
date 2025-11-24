@@ -17,7 +17,7 @@ def test_imports():
     """Test that all required imports work."""
     print("Testing imports...")
     try:
-        from src.auth_adapter import (
+        from src.auth_sdk.auth_adapter import (
             validate_token,
             set_jwks_url,
             get_jwks_url,
@@ -39,7 +39,7 @@ def test_jwks_configuration():
     """Test JWKS URL configuration."""
     print("\nTesting JWKS configuration...")
     try:
-        from src.auth_adapter import set_jwks_url, get_jwks_url
+        from src.auth_sdk.auth_adapter import set_jwks_url, get_jwks_url
         
         # Test setting JWKS URL
         test_url = "https://test.example.com/.well-known/jwks.json"
@@ -66,11 +66,11 @@ def test_token_management():
     """Test token management functions."""
     print("\nTesting token management...")
     try:
-        from src.auth_adapter import get_final_token, get_token_for_mcp, get_token_for_user_context
+        from src.auth_sdk.auth_adapter import get_final_token, get_token_for_mcp, get_token_for_user_context
         
         # Test with user token only
         payload1 = {"token": "user_token_123"}
-        result1 = get_final_token(payload1, prefer_agent_token=False)
+        result1 = get_final_token(payload1, prefer_obo_token=False)
         if result1 == "user_token_123":
             print("✓ User token selection works")
         else:
@@ -115,7 +115,7 @@ def test_agent_provider_creation():
     """Test AgentOAuthProvider creation."""
     print("\nTesting AgentOAuthProvider creation...")
     try:
-        from src.auth_adapter import AgentOAuthProvider, set_agent_oauth_provider
+        from src.auth_sdk.auth_adapter import AgentOAuthProvider, set_agent_oauth_provider
         
         # Test provider creation
         provider = AgentOAuthProvider(
@@ -145,7 +145,7 @@ def test_agent_provider_validation():
     """Test AgentOAuthProvider validation."""
     print("\nTesting AgentOAuthProvider validation...")
     try:
-        from src.auth_adapter import AgentOAuthProvider
+        from src.auth_sdk.auth_adapter import AgentOAuthProvider
         
         # Test missing required parameters
         try:

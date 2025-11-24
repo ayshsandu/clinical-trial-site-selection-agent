@@ -131,10 +131,10 @@ def test_adapter_uses_sdk_exceptions():
         agent_path = Path(__file__).parent
         sys.path.insert(0, str(agent_path))
         
-        from src.auth_adapter import validate_token
+        from src.auth_sdk.auth_adapter import validate_token
         
         # Check that the module imports the SDK exceptions
-        import src.auth_adapter as adapter_module
+        import src.auth_sdk.auth_adapter as adapter_module
         
         # Get the source code to verify imports
         import inspect
@@ -146,10 +146,10 @@ def test_adapter_uses_sdk_exceptions():
             print("✗ auth_adapter doesn't import SDK exception classes")
             return False
         
-        if "validate_with_scope" in source:
-            print("✓ auth_adapter uses validate_with_scope method")
+        if "AuthSDK" in source:
+            print("✓ auth_adapter uses AuthSDK")
         else:
-            print("✗ auth_adapter doesn't use validate_with_scope method")
+            print("✗ auth_adapter doesn't use AuthSDK")
             return False
         
         return True

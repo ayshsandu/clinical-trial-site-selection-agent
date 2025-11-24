@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.agent import run_agent
 from src.nodes import format_report, format_json_report
-from src.auth_adapter import (
+from src.auth_sdk.auth_adapter import (
     validate_token, 
     set_jwks_url, 
     AgentOAuthProvider, 

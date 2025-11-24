@@ -95,7 +95,7 @@ def validate_with_scope(
 - Supports both string and array scope formats
 - Detailed error messages showing missing scopes
 
-### Auth Adapter Simplification (`src/auth_adapter.py`)
+### Auth Adapter Simplification (`src/auth_sdk/auth_adapter.py`)
 
 The `validate_token()` function has been simplified to use the SDK's `validate_with_scope()` method:
 
@@ -124,7 +124,7 @@ payload = _token_validator.validate_with_scope(
 )
 ```
 
-**Code reduction:** ~70 lines removed from auth_adapter.py
+**Code reduction:** ~70 lines removed from auth_sdk/auth_adapter.py
 
 ## Benefits
 
@@ -239,7 +239,7 @@ payload = validator.validate(
    - Exported new exception classes
    - Exported TokenValidator
 
-3. **`/Users/ayesha/Downloads/clinical-trial-demo/agent/src/auth_adapter.py`**
+3. **`/Users/ayesha/Downloads/clinical-trial-demo/agent/src/auth_sdk/auth_adapter.py`**
    - Simplified `validate_token()` function
    - Uses SDK's `validate_with_scope()` method
    - ~70 lines removed

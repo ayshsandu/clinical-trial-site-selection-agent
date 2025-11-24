@@ -99,7 +99,7 @@ def test_code_logic():
     print("="*70)
     
     # Read the auth_adapter code
-    adapter_path = Path(__file__).parent / "src" / "auth_adapter.py"
+    adapter_path = Path(__file__).parent / "src" / "auth_sdk" / "auth_adapter.py"
     with open(adapter_path, 'r') as f:
         code = f.read()
     
