@@ -187,8 +187,8 @@ function LogsViewer({ serverUrl, serverName, onClose }) {
           <span className="stat-value">{filteredLogs.filter(log => log.toolName).length}</span>
         </div>
         <div className="stat-item">
-          <span className="stat-label">By Agent:</span>
-          <span className="stat-value">{filteredLogs.filter(log => log.sub == "fb0dba08-1621-49f6-82e4-d81094c5de54").length}</span>
+          <span className="stat-label">Unique OBO Actors:</span>
+          <span className="stat-value">{new Set(filteredLogs.map(log => log.act).filter(Boolean)).size}</span>
         </div>
       </div>
 

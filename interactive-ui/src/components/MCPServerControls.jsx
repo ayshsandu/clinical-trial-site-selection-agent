@@ -30,7 +30,6 @@ function MCPServerControls() {
     const setToken = async () => {
       try {
         const token = await getAccessToken()
-        console.log('Setting MCP auth token:', token)
         mcpClientManager.setAuthToken(token)
         setIsAuthReady(true)
       } catch (err) {
