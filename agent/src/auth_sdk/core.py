@@ -6,13 +6,15 @@ from .oauth import OAuthClient
 from .server import LocalCallbackServer
 from urllib.parse import urlparse
 from .logger import setup_logger
+from .agent_auth import AgentOAuthProvider
 
 class AuthSDK:
-    def __init__(self, config: TokenConfig, session_manager: Optional[SessionManager] = None):
+    def __init__(self, config: TokenConfig, session_manager: Optional[SessionManager] = None, agent_auth_provider: Optional[AgentOAuthProvider] = None):
         self.config = config
         self.session_manager = session_manager or SessionManager()
         self.validator = TokenValidator(config)
         self.oauth_client = OAuthClient(config)
+        self.agent_auth_provider = agent_auth_provider
         self.logger = setup_logger(__name__, config.log_level)
 
     def process_request(self, request_headers: Dict[str, str]) -> AuthResult:
@@ -49,7 +51,7 @@ class AuthSDK:
                 self.logger.info(f"Creating new session for JTI: {jti}")
                 session = self.session_manager.create_session(jti, sub)
                 # Start OAuth Flow
-                auth_url = self.oauth_client.create_authorization_url(session)
+                auth_url = self.oauth_client.create_authorization_url(session, self.agent_auth_provider)
                 self.session_manager.update_session(session)
                 self.logger.info("Initiating OAuth flow for new session")
                 return AuthResult(is_authenticated=False, redirect_url=auth_url, session=session)
@@ -64,7 +66,7 @@ class AuthSDK:
                 # Restart flow to be safe, or check state? 
                 # For simplicity, if no token, we restart flow.
                 self.logger.warning(f"Session exists for JTI {jti} but no OBO token, restarting flow")
-                auth_url = self.oauth_client.create_authorization_url(session)
+                auth_url = self.oauth_client.create_authorization_url(session, self.agent_auth_provider)
                 self.session_manager.update_session(session)
                 return AuthResult(is_authenticated=False, redirect_url=auth_url, session=session)
 
@@ -78,7 +80,7 @@ class AuthSDK:
             self.logger.error(f"Internal error in process_request: {str(e)}")
             return AuthResult(is_authenticated=False, error=f"Internal error: {str(e)}")
 
-    def handle_callback(self, code: str, state: str) -> AuthResult:
+    def handle_callback(self, code: str, state: str, agent_token: Optional[str] = None) -> AuthResult:
         """
         Handle OAuth2 callback.
         """
@@ -90,10 +92,11 @@ class AuthSDK:
 
         try:
             self.logger.info("Exchanging authorization code for tokens")
-            token_response = self.oauth_client.exchange_code_for_token(code, session)
+            token_response = self.oauth_client.exchange_code_for_token(code, session, agent_token)
             
             # Update Session
             session.obo_access_token = token_response.get("access_token")
+            self.logger.debug("Received OBO access token") 
             session.refresh_token = token_response.get("refresh_token")
             session.id_token = token_response.get("id_token")
             self.logger.debug(f"Token exchange successful for session JTI: {session.jti}")
@@ -102,7 +105,7 @@ class AuthSDK:
             session.state = None # Clear state to prevent replay of callback
             
             self.session_manager.update_session(session)
-            self.logger.info(f"Session updated with OBO tokens for JTI: {session.jti}")
+            self.logger.info(f"Session updated with OBO tokens for JTI: {session}")
             
             return AuthResult(is_authenticated=True, session=session)
         except Exception as e:

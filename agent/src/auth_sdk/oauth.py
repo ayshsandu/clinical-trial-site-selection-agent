@@ -3,7 +3,9 @@ import hashlib
 import base64
 import requests
 from urllib.parse import urlencode
+from typing import Optional
 from .models import TokenConfig, Session
+from .agent_auth import AgentOAuthProvider
 from .logger import setup_logger
 
 def generate_code_verifier() -> str:
@@ -25,7 +27,19 @@ class OAuthClient:
         challenge = generate_code_challenge(verifier)
         return verifier, challenge
 
-    def create_authorization_url(self, session: Session) -> str:
+    def create_authorization_url(self, session: Session, agent_auth_provider: Optional[AgentOAuthProvider] = None) -> str:
+        """
+        Create authorization URL for OAuth flow.
+        
+        Args:
+            session: The session object to store PKCE and state
+            agent_auth_provider: Optional AgentOAuthProvider for agent authentication
+            
+        Returns:
+            str: The authorization URL
+        """
+
+        # Standard OAuth flow with PKCE
         verifier, challenge = self._generate_pkce_pair()
         session.pkce_verifier = verifier
         
@@ -42,11 +56,15 @@ class OAuthClient:
             "code_challenge_method": "S256",
         }
         
-        self.logger.debug(f"Generated authorization URL with state: {state}") # Added logging statement
-        
-        return f"{self.config.authorization_endpoint}?{urlencode(params)}" # Corrected the return statement based on original and instruction's likely intent
+        #if agent_auth_provider add additional 'requested_actor' param
+        if agent_auth_provider:
+            params["requested_actor"] = agent_auth_provider._agent_id
 
-    def exchange_code_for_token(self, code: str, session: Session) -> dict:
+        self.logger.debug(f"Generated authorization URL with state: {state}")
+        
+        return f"{self.config.authorization_endpoint}?{urlencode(params)}"
+
+    def exchange_code_for_token(self, code: str, session: Session, agent_token: Optional[str] = None) -> dict:
         if not session.pkce_verifier:
             raise ValueError("No PKCE verifier found in session")
 
@@ -57,15 +75,21 @@ class OAuthClient:
             "redirect_uri": self.config.redirect_uri,
             "code_verifier": session.pkce_verifier,
         }
-        
 
+        if agent_token:
+            self.logger.debug("Agent access token provided")
 
+            data["actor_token"] = agent_token
+
+        self.logger.debug("Preparing to exchange code for token with data: {}".format({k: v for k, v in data.items() if k != "code_verifier"}))
+       
         try:
             self.logger.info(f"Exchanging authorization code for tokens at {self.config.token_endpoint}")
             response = requests.post(self.config.token_endpoint, data=data, verify=self.config.ssl_verify)
             response.raise_for_status()
             self.logger.debug("Token exchange successful")
             return response.json()
+        
         except requests.exceptions.RequestException as e:
             self.logger.error(f"Token exchange request failed: {e.response.status_code if e.response else 'No response'} - {e.response.text if e.response else str(e)}")
             if e.response is not None:

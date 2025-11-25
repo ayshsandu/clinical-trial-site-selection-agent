@@ -82,16 +82,7 @@ class QueryResponse(BaseModel):
     error: Optional[str] = None
 
 
-# Configure JWKS URL for authentication
-jwks_url = os.getenv("JWKS_URL")
-if jwks_url:
-    set_jwks_url(jwks_url)
-    logger.info(f"JWKS URL configured: {jwks_url}")
-else:
-    logger.warning("JWKS_URL not set - API endpoints will not require authentication")
-
-
-# Configure agent OAuth provider
+# Configure agent OAuth provider first
 agent_client_id = os.getenv("AGENT_CLIENT_ID")
 agent_client_secret = os.getenv("AGENT_CLIENT_SECRET")
 agent_redirect_url = os.getenv("AGENT_REDIRECT_URL", "http://localhost/callback")
@@ -106,7 +97,8 @@ logger.info(f"AGENT_ID: {'***' if agent_id else 'Not set'}")
 logger.info(f"AGENT_PASSWORD: {'***' if agent_password else 'Not set'}")
 logger.info(f"TOKEN_ENDPOINT: {token_endpoint or 'Not set'}")
 
-# Check if we have the required credentials
+# Set up agent OAuth provider if credentials are available
+agent_provider = None
 has_required_creds = agent_client_id and agent_id and agent_password
 
 if token_endpoint and has_required_creds:
@@ -117,22 +109,31 @@ if token_endpoint and has_required_creds:
         agent_id=agent_id,
         agent_password=agent_password,
         token_endpoint=token_endpoint,
-        ssl_verify=False  # For development with self-signed certificates
+        # ssl_verify=False  # For development with self-signed certificates
     )
     set_agent_oauth_provider(agent_provider)
     logger.info("Agent OAuth provider configured")
-    
-    # Acquire agent token at startup
+else:
+    logger.info("Agent OAuth provider not configured - required agent credentials not provided")
+
+# Configure JWKS URL for authentication (after agent provider is set up)
+jwks_url = os.getenv("JWKS_URL")
+if jwks_url:
+    set_jwks_url(jwks_url)
+    logger.info(f"JWKS URL configured: {jwks_url}")
+else:
+    logger.warning("JWKS_URL not set - API endpoints will not require authentication")
+
+# Acquire agent token at startup if provider was configured
+if agent_provider:
     try:
-        agent_token = get_agent_token()
+        agent_token = asyncio.run(get_agent_token())
         if agent_token:
             logger.info("Agent token acquired successfully at startup")
         else:
             logger.warning("Failed to acquire agent token at startup")
     except Exception as e:
         logger.warning(f"Failed to acquire agent token at startup: {e}")
-else:
-    logger.info("Agent OAuth provider not configured - required agent credentials not provided")
 
 
 # API endpoints
@@ -153,6 +154,7 @@ async def run_query(request: QueryRequest, token_payload = Depends(validate_toke
 
         # Extract bearer token using the auth utils
         bearer_token = get_token_for_mcp(token_payload)
+        logger.debug("Extracted bearer token for MCP")
 
         # Run the agent
         final_state = run_agent(request.query, bearer_token=bearer_token)
@@ -191,7 +193,7 @@ async def oauth_callback(code: str, state: str):
     """
     try:
         logger.info(f"Received OAuth callback with state: {state}")
-        result = handle_oauth_callback(code, state)
+        result = await handle_oauth_callback(code, state)
         logger.info(f"OAuth callback processed successfully: {result}")
         
         # Return a simple success page

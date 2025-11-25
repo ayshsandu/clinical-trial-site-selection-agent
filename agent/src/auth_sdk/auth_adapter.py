@@ -80,7 +80,8 @@ def initialize_auth_sdk(
     client_id: str = None,
     client_secret: str = None,
     redirect_uri: str = None,
-    scope: str = None
+    scope: str = None,
+    agent_auth_provider: Optional[AgentOAuthProvider] = None
 ):
     """
     Initialize the AuthSDK for OBO flow.
@@ -95,6 +96,7 @@ def initialize_auth_sdk(
         client_secret: OAuth client secret (optional)
         redirect_uri: OAuth redirect URI
         scope: OAuth scope (default: "openid profile email")
+        agent_auth_provider: Optional agent OAuth provider for acquiring agent tokens
     """
     global _auth_sdk, _session_manager, _logger
     
@@ -130,7 +132,7 @@ def initialize_auth_sdk(
     )
     
     _session_manager = SessionManager()
-    _auth_sdk = AuthSDK(config, _session_manager)
+    _auth_sdk = AuthSDK(config, _session_manager, agent_auth_provider or _agent_provider)
     _logger = setup_logger(__name__, config.log_level)
     _logger.info(f"AuthSDK initialized with JWKS URL: {jwks_url}")
 
@@ -273,7 +275,7 @@ async def validate_token(credentials: HTTPAuthorizationCredentials = Depends(sec
         
         # Get cached agent token if available
         try:
-            agent_token = await get_agent_token()
+            agent_token = get_agent_token()
             if agent_token:
                 payload["agent_token"] = agent_token
                 _logger.debug("Using cached agent token")
@@ -297,7 +299,7 @@ async def validate_token(credentials: HTTPAuthorizationCredentials = Depends(sec
         )
 
 
-def handle_oauth_callback(code: str, state: str) -> Dict[str, Any]:
+async def handle_oauth_callback(code: str, state: str) -> Dict[str, Any]:
     """
     Handle OAuth callback and complete the OBO flow.
     
@@ -330,7 +332,7 @@ def handle_oauth_callback(code: str, state: str) -> Dict[str, Any]:
         _logger.info(f"Handling OAuth callback with state: {state}")
         
         # Handle callback using AuthSDK
-        auth_result: AuthResult = _auth_sdk.handle_callback(code, state)
+        auth_result: AuthResult = _auth_sdk.handle_callback(code, state, get_agent_token())
         
         if not auth_result.is_authenticated:
             _logger.error(f"OAuth callback failed: {auth_result.error}")
@@ -378,7 +380,7 @@ def set_agent_oauth_provider(provider: AgentOAuthProvider):
     _agent_provider = provider
 
 
-async def get_agent_token() -> Optional[str]:
+def get_agent_token() -> Optional[str]:
     """Get the cached agent token, acquiring it if necessary."""
     global _agent_token, _logger
     
@@ -395,7 +397,7 @@ async def get_agent_token() -> Optional[str]:
     if _agent_provider:
         try:
             _logger.info("Acquiring new agent token from the SDK")
-            tokens = await _agent_provider.acquire_agent_tokens()
+            tokens = _agent_provider.acquire_agent_tokens()
             _agent_token = tokens
             return tokens.get("access_token")
         except Exception as e:

@@ -49,6 +49,7 @@ This agent orchestrates data from multiple MCP servers to provide data-driven re
 poetry install
 
 # Or using pip
+python -m venv venv
 source venv/bin/activate && pip install -r requirements.txt
 pip install -r requirements.txt
 ```

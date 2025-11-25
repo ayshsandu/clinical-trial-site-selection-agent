@@ -31,7 +31,8 @@ def query_demographics(state: TrialSiteSelectionState) -> TrialSiteSelectionStat
     
     demographics_url = os.getenv("DEMOGRAPHICS_SERVER_URL", "http://localhost:4001/mcp")
     bearer_token = state.get("bearer_token")
-    
+    debug_info = f" with bearer token {bearer_token}" if bearer_token else " without bearer token"
+    logger.info(f"---------Connecting to demographics server at {demographics_url}{debug_info}")    
     try:
         with MCPClient(demographics_url, bearer_token) as client:
             pools = []

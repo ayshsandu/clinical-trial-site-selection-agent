@@ -26,6 +26,8 @@ class MCPClient:
 
     async def _ensure_initialized(self):
         """Ensure the client is initialized and tools are loaded."""
+
+        logger.info(f"Initializing MCP client for server: {self.server_url} bearer_token: {'provided' if self.bearer_token else 'not provided'}")
         if not self._initialized:
             # Create a MultiServerMCPClient with just this server
             config = {
@@ -42,6 +44,7 @@ class MCPClient:
                 }
             
             client = MultiServerMCPClient(config)
+        
             self._tools = await client.get_tools()
             self._initialized = True
             logger.info(f"Loaded {len(self._tools)} tools from {self.server_url}")

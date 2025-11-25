@@ -64,7 +64,7 @@ def run_agent(user_query: str, bearer_token: Optional[str] = None) -> TrialSiteS
     Returns:
         Final state with recommendations
     """
-    logger.info(f"Running agent with query: {user_query}")
+    logger.info(f"Running agent with query: {user_query} and bearer token: {'present' if bearer_token else 'not provided'}")
     
     # Create agent
     app = create_agent()
