@@ -47,6 +47,41 @@ This demonstration system helps identify optimal clinical trial sites by analyzi
 - **Google Gemini API Key** - For AI-powered site selection
 - **Authentication Server** (Optional) - Asgardeo or similar for OAuth (demo works without it)
 
+## Identity Server Setup
+
+If using an authentication server like Asgardeo for OAuth protection:
+
+1. **Create MCP Client App**:
+   - Create a new application named "Clinical Compass App"
+   - Set callback URL to the agent's redirect URI (e.g., `http://localhost:8010/auth/callback`)
+   - Enable "App native authentication"
+   - Obtain and note the client ID
+
+2. **Create Agent**:
+   - Create a new agent named "Trial Site Advisor Agent"
+   - Obtain the agent ID and secret
+
+3. **Create API Resource**:
+   - Create a new API resource to model the agent as a resource and govern access to it
+   - Identifier: `trial-site-advisor-agent`
+   - Display name: "Trial Site Advisor Agent API Interface"
+   - Scope: `query_agent`
+
+4. **Authorize API Resource for MCP Client App**:
+   - Under the "Clinical Compass App" application's "Authorization" settings
+   - Authorize the "Trial Site Advisor Agent API Interface" API resource
+
+5. **Configure Application Roles**:
+   - In the "Clinical Compass App" application's "Role" settings
+   - Set role audience to "Organization"
+
+6. **Create Role**:
+   - Create a new role named "Trial Coordinator" with organization audience
+   - Authorize the role with "Trial Site Advisor Agent API Interface" with scope `query_agent`
+
+7. **Assign Role to User**:
+   - Assign the "Trial Coordinator" role to users who need to query the agent services
+
 ## Quick Start
 
 ### Option 1: Automated Setup (Recommended)
