@@ -14,15 +14,39 @@ function ErrorDisplay({ error }) {
     }
   }
 
+  // if error.response.status is 403 show different message that user lacks permissions to use the service
+  const is403 = error.response && error.response.status === 403
+  if (is403) {
+    return (
+      <div className="card error-display fade-in">
+        <div className="error-header">
+          <AlertCircle size={32} className="error-icon" />
+          <div>
+            <h3 className="error-title">Access Forbidden</h3>
+            <p className="error-subtitle">You do not have permission to access this service.</p>
+          </div>
+        </div>
+
+        <div className="error-help">
+          <p className="error-help-title">Troubleshooting:</p>
+          <ul className="error-help-list">
+            <li>Ensure your account has the necessary permissions</li>
+            <li>Contact your administrator for access</li>
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="card error-display fade-in">
-      <div className="error-header">
+      {/* <div className="error-header">
         <AlertCircle size={32} className="error-icon" />
         <div>
           <h3 className="error-title">Unable to Complete Request</h3>
           <p className="error-subtitle">{error.message}</p>
         </div>
-      </div>
+      </div> */}
 
       {error.details && (
         <div className="error-details">
