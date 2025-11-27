@@ -17,9 +17,9 @@ function QueryForm({ onSubmit, isLoading }) {
       <div className="query-form-header">
         <Sparkles size={24} className="query-icon" />
         <div>
-          <h2 className="query-form-title">Trial Site Query</h2>
+          <h2 className="query-form-title">Trial Feasibility Assessment</h2>
           <p className="query-form-subtitle">
-            Describe your clinical trial requirements in natural language
+            Describe your protocol requirements to identify optimal sites
           </p>
         </div>
       </div>
@@ -27,12 +27,12 @@ function QueryForm({ onSubmit, isLoading }) {
       <form onSubmit={handleSubmit} className="query-form">
         <div className="form-group">
           <label htmlFor="query" className="form-label">
-            Your Query
+            Protocol Parameters
           </label>
           <textarea
             id="query"
             className="form-textarea"
-            placeholder="Example: Find sites for a Phase III Type 2 Diabetes trial targeting 200 patients in the Northeast US with strong endocrinology departments"
+            placeholder="Example: Identify sites for a Phase III Type 2 Diabetes study requiring 200 patients in the Northeast US. Sites must have endocrinology expertise and recent experience with similar protocols."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             disabled={isLoading}
@@ -40,8 +40,8 @@ function QueryForm({ onSubmit, isLoading }) {
           />
           <div className="query-help">
             <p>
-              💡 <strong>Tips:</strong> Include trial phase, disease/condition, target enrollment, 
-              geographic preferences, and any special requirements (equipment, expertise, etc.)
+              💡 <strong>Tips:</strong> Include trial phase, therapeutic area, target enrollment,
+              geographic preferences, and specific inclusion/exclusion criteria.
             </p>
           </div>
         </div>
@@ -55,8 +55,8 @@ function QueryForm({ onSubmit, isLoading }) {
             <>
               <div className="spinner" style={{ width: '20px', height: '20px' }}>
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.25"/>
-                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.25" />
+                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
                 </svg>
               </div>
               Analyzing...
@@ -64,7 +64,7 @@ function QueryForm({ onSubmit, isLoading }) {
           ) : (
             <>
               <Send size={20} />
-              Find Sites
+              Analyze Sites
             </>
           )}
         </button>

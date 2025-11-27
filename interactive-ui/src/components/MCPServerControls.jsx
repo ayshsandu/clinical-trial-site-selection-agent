@@ -57,7 +57,7 @@ function MCPServerControls() {
   const loadAvailableTools = async () => {
     setIsLoadingTools(true)
     setError(null)
-    
+
     try {
       const tools = await mcpClientManager.listTools(currentServer.url)
       setAvailableTools(tools)
@@ -94,7 +94,7 @@ function MCPServerControls() {
     if (paramType === 'number') {
       parsedValue = value === '' ? 0 : Number(value);
     }
-    
+
     setToolParams(prev => ({
       ...prev,
       [paramName]: parsedValue
@@ -126,7 +126,7 @@ function MCPServerControls() {
 
       // Extract content from MCP response
       let resultData = response;
-      
+
       // If the response has content array, extract the text
       if (response.content && Array.isArray(response.content)) {
         resultData = response.content.map(item => {
@@ -140,7 +140,7 @@ function MCPServerControls() {
           }
           return item;
         });
-        
+
         // If only one item, unwrap it
         if (resultData.length === 1) {
           resultData = resultData[0];
@@ -204,8 +204,8 @@ function MCPServerControls() {
       <div className="mcp-header">
         <Server size={24} className="mcp-icon" />
         <div>
-          <h2 className="mcp-title">MCP Server Controls</h2>
-          <p className="mcp-subtitle">Direct access to MCP server tools using official SDK</p>
+          <h2 className="mcp-title">Connected Sources</h2>
+          <p className="mcp-subtitle">Direct access to clinical data sources and site performance metrics</p>
         </div>
         <button
           className="btn-refresh"
@@ -241,7 +241,7 @@ function MCPServerControls() {
         >
           <Database size={18} />
           <div className="server-tab-content">
-            <span className="server-tab-name">Demographics MCP</span>
+            <span className="server-tab-name">Patient Demographics</span>
             <span className="server-tab-desc">{mcpServers.demographics.description}</span>
           </div>
         </button>
@@ -268,7 +268,7 @@ function MCPServerControls() {
         >
           <Activity size={18} />
           <div className="server-tab-content">
-            <span className="server-tab-name">Performance MCP</span>
+            <span className="server-tab-name">Site Performance</span>
             <span className="server-tab-desc">{mcpServers.performance.description}</span>
           </div>
         </button>
@@ -288,7 +288,7 @@ function MCPServerControls() {
       {/* Tool Selection */}
       <div className="tool-selection">
         <label htmlFor="tool-select" className="tool-label">
-          Select Tool {isLoadingTools && <span className="loading-text">(Loading...)</span>}
+          Select Data Query {isLoadingTools && <span className="loading-text">(Loading...)</span>}
           {!isAuthReady && <span className="loading-text">(Authenticating...)</span>}
         </label>
         <select
@@ -344,8 +344,8 @@ function MCPServerControls() {
               <>
                 <div className="spinner" style={{ width: '20px', height: '20px' }}>
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.25"/>
-                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.25" />
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
                   </svg>
                 </div>
                 Executing...
@@ -353,7 +353,7 @@ function MCPServerControls() {
             ) : (
               <>
                 <PlayCircle size={20} />
-                Execute Tool
+                Run Query
               </>
             )}
           </button>

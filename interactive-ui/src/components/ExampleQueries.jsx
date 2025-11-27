@@ -25,11 +25,11 @@ function ExampleQueries({ onSelectExample }) {
     <div className="card example-queries">
       <div className="example-header">
         <Lightbulb size={20} className="example-icon" />
-        <h3 className="example-title">Example Queries</h3>
+        <h3 className="example-title">Sample Protocols</h3>
       </div>
-      
+
       <p className="example-description">
-        Click on an example to try it out:
+        Select a sample protocol to run a feasibility analysis:
       </p>
 
       <div className="example-grid">

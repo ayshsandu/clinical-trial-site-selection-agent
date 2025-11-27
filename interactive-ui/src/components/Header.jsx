@@ -9,14 +9,14 @@ function Header() {
           <div className="header-logo">
             <Activity className="header-icon" size={32} />
             <div>
-              <h1 className="header-title">ClinicalCompass: Clinical Trial Site Selection Demo</h1>
-              <p className="header-subtitle">AI-Powered Site Recommendations</p>
+              <h1 className="header-title">Clinical Compass: Site Selection Assistant</h1>
+              <p className="header-subtitle">AI-Powered Clinical Trial Feasibility Analysis</p>
             </div>
           </div>
           <div className="header-status">
             <div className="status-indicator">
               <div className="status-dot"></div>
-              <span>Agent Active</span>
+              <span>System Online</span>
             </div>
           </div>
         </div>

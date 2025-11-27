@@ -267,7 +267,7 @@ const ArchitectureDiagram = ({ activeFlow }) => {
 
           {/* Internal Client Node */}
           <rect x="-60" y="40" width="120" height="30" rx="4" fill="white" stroke={colors.linkDirect} strokeWidth="2" />
-          <text x="0" y="60" textAnchor="middle" className="text-xs fill-slate-700 font-mono">MCP Client</text>
+          <text x="0" y="60" textAnchor="middle" className="text-xs fill-slate-700 font-mono">Client</text>
         </g>
 
         {/* Agent (Trial Site Advisor) - Right Top */}
